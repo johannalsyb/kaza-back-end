@@ -1,0 +1,4 @@
+.terraform/
+.terraform.lock.hcl
+secrets.auto.tfvars
+key_pairs/*.pem

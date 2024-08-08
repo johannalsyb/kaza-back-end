@@ -1,0 +1,6 @@
+node_modules/
+Kazaswap/node_modules/
+api/dist/
+api/node_modules/
+common/lib/
+common/node_modules/

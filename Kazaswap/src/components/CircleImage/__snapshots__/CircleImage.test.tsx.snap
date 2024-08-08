@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CircleImage renders correctly with custom size 1`] = `
+<img
+  loading="lazy"
+  onError={[Function]}
+  src="https://picsum.photos/200/300"
+  style={
+    {
+      "borderRadius": 85,
+      "height": 170,
+      "width": 170,
+    }
+  }
+/>
+`;
+
+exports[`CircleImage renders correctly with custom source 1`] = `
+<img
+  loading="lazy"
+  onError={[Function]}
+  src="https://picsum.photos/200/300"
+  style={
+    {
+      "borderRadius": 50,
+      "height": 100,
+      "width": 100,
+    }
+  }
+/>
+`;
+
+exports[`CircleImage renders correctly with default size 1`] = `
+<img
+  loading="lazy"
+  onError={[Function]}
+  src="https://picsum.photos/200/300"
+  style={
+    {
+      "borderRadius": 50,
+      "height": 100,
+      "width": 100,
+    }
+  }
+/>
+`;
+
+exports[`CircleImage renders correctly with default source 1`] = `
+<img
+  loading="lazy"
+  onError={[Function]}
+  src=""
+  style={
+    {
+      "borderRadius": 50,
+      "height": 100,
+      "width": 100,
+    }
+  }
+/>
+`;

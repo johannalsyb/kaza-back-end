@@ -1,0 +1,66 @@
+version: "3.9"
+services:
+  db:
+    image: mariadb:11.3.2
+    restart: unless-stopped
+    volumes:
+      - /nfs/db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=kazaswap
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    healthcheck:
+        test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
+        start_period: 30s
+        interval: 30s
+        timeout: 5s
+        retries: 3
+
+  directus:
+    image: ${KAZASWAP_CMS_IMAGE}
+    restart: unless-stopped
+    environment:
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - DB_CLIENT=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=kazaswap
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_CHARSET=utf8mb4
+      - KEY=${ADMIN_DB_KEY}
+      - SECRET=${ADMIN_DB_SECRET}
+    volumes:
+      - /nfs/directus/uploads:/directus/uploads
+    ports:
+      - '${CMS_PORT}:8055'
+    links:
+      - 'db:db'
+    depends_on:
+      db:
+        condition: service_healthy
+  
+  db_backup:
+    image: mariadb:11.3.2
+    restart: unless-stopped
+    volumes:
+      - /nfs/backups:/mnt
+    command: ["bash", "-c", "trap exit SIGINT; while true; do echo BACKING UP...; mariadb-dump -h db -uroot -p${DB_ROOT_PASSWORD} kazaswap -r /mnt/kazaswap_`date '+%Y-%m-%d_%H%M%S'`.sql; echo DONE...;  sleep 14400; done"]
+    links:
+      - 'db:db'
+    depends_on:
+      db:
+        condition: service_healthy
+
+  backup_roll:
+    image: bash:latest
+    restart: unless-stopped
+    volumes:
+      - /nfs/backups:/mnt
+    command: ["bash", "-c", "trap exit SIGINT; while true; do find /mnt -mindepth 1 -mtime +31 -delete; sleep 14400; done"]
+    depends_on:
+      db:
+        condition: service_healthy
+    

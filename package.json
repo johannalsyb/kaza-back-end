@@ -1,0 +1,21 @@
+{
+  "name": "boilerplate",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "cd api && bun run src/server.ts",
+    "watch": "cd api && bun run --watch src/server.ts & cd web && bun run --watch start",
+    "migrate": "npm run migrate:up",
+    "migrate:up": "docker-compose exec directus npx directus database migrate:up",
+    "migrate:down": "docker-compose exec directus npx directus database migrate:down",
+    "db": "docker-compose exec db mariadb -pkaza kaza",
+    "republish": "cd common && npm run unpublish && npm publish && cd ../Kazaswap && npm upgrade @kazaswap/common && cd ..",
+    "deploy-dev-migrations": "cd ./directus/extensions/migrations && scp -rp . bgr1:./dev.kazaswap.co/directus/extensions/migrations && cd -"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bun": "^1.1.22"
+  }
+}

@@ -1,0 +1,26 @@
+FROM oven/bun:1 as builder
+WORKDIR /usr/src/app
+
+RUN apt-get update && apt-get install -y wget
+RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+RUN export NVM_DIR="$HOME/.nvm" && . $HOME/.nvm/nvm.sh && . $HOME/.nvm/bash_completion && nvm install 20
+
+RUN mkdir common
+RUN mkdir api
+
+COPY ./api/package.json ./api/package.json
+RUN export NVM_DIR="$HOME/.nvm" && . $HOME/.nvm/nvm.sh && . $HOME/.nvm/bash_completion && cd api && npm install
+
+# COPY ./common ./common
+
+COPY ./api/tsconfig.json ./api/tsconfig.json
+COPY ./api/src ./api/src
+COPY ./api/assets ./api/assets
+# RUN cd api && npm run build
+
+FROM oven/bun:1 as runner
+WORKDIR /api
+COPY --from=builder /usr/src/app/api /api
+COPY ./common /common
+
+CMD [ "bun", "run", "src/server.ts" ]

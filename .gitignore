@@ -1,0 +1,10 @@
+db/
+common/lib/
+common/tsconfig.tsbuildinfo
+
+.DS_Store
+directus/uploads/
+
+verdaccio/
+airbnb.ts
+api/assets/markerTemplate.bak.svg

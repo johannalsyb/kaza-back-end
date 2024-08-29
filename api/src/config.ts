@@ -33,34 +33,35 @@ export const DEFAULT_EMAIL_NAME = process.env.DEFAULT_EMAIL_NAME || "Kaza Swap"
 export const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "support@kazaswap.co"
 
 export const S3_REGION = process.env.S3_REGION || "eu-west-1"
-export const S3_ACCESS_KEY_ID = process.env.S3_ACCESS_KEY_ID
-export const S3_SECRET_ACCESS_KEY = process.env.S3_SECRET_ACCESS_KEY
+export const S3_ACCESS_KEY = process.env.S3_ACCESS_KEY
+export const S3_SECRET_KEY = process.env.S3_SECRET_KEY
 export const S3_ENDPOINT = process.env.S3_ENDPOINT
 export const S3_BUCKET = process.env.S3_BUCKET || "kazaswap-files-dev"
+export const S3_SERVER_URL = process.env.S3_SERVER_URL
 
 export const S3_IMAGES_REGION = process.env.S3_IMAGES_REGION || S3_REGION
 export const S3_IMAGES_BUCKET = process.env.S3_IMAGES_BUCKET || S3_BUCKET
 export const S3_IMAGES_PREFIX = process.env.S3_IMAGES_PREFIX || "images"
-export const S3_IMAGES_ENDPOINT = process.env.S3_IMAGES_ENDPOINT
-export const S3_IMAGES_ACCESS_KEY = process.env.S3_IMAGES_ACCESS_KEY
-export const S3_IMAGES_SECRET_KEY = process.env.S3_IMAGES_SECRET_KEY
-export const S3_IMAGES_SERVER_URL = process.env.S3_IMAGES_SERVER_URL
+export const S3_IMAGES_ENDPOINT = process.env.S3_IMAGES_ENDPOINT || S3_ENDPOINT
+export const S3_IMAGES_ACCESS_KEY = process.env.S3_IMAGES_ACCESS_KEY || S3_ACCESS_KEY
+export const S3_IMAGES_SECRET_KEY = process.env.S3_IMAGES_SECRET_KEY || S3_SECRET_KEY
+export const S3_IMAGES_SERVER_URL = process.env.S3_IMAGES_SERVER_URL || S3_SERVER_URL
 
 export const S3_CHATS_REGION = process.env.S3_CHATS_REGION || S3_REGION
 export const S3_CHATS_BUCKET = process.env.S3_CHATS_BUCKET || S3_BUCKET
 export const S3_CHATS_PREFIX = process.env.S3_CHATS_PREFIX || "chats"
-export const S3_CHATS_ENDPOINT = process.env.S3_CHATS_ENDPOINT
-export const S3_CHATS_ACCESS_KEY = process.env.S3_CHATS_ACCESS_KEY
-export const S3_CHATS_SECRET_KEY = process.env.S3_CHATS_SECRET_KEY
-export const S3_CHATS_SERVER_URL = process.env.S3_CHATS_SERVER_URL
+export const S3_CHATS_ENDPOINT = process.env.S3_CHATS_ENDPOINT || S3_ENDPOINT
+export const S3_CHATS_ACCESS_KEY = process.env.S3_CHATS_ACCESS_KEY || S3_ACCESS_KEY
+export const S3_CHATS_SECRET_KEY = process.env.S3_CHATS_SECRET_KEY || S3_SECRET_KEY
+export const S3_CHATS_SERVER_URL = process.env.S3_CHATS_SERVER_URL || S3_SERVER_URL
 
 export const S3_NOTIFICATIONS_REGION = process.env.S3_NOTIFICATIONS_REGION || S3_REGION
 export const S3_NOTIFICATIONS_BUCKET = process.env.S3_NOTIFICATIONS_BUCKET || S3_BUCKET
 export const S3_NOTIFICATIONS_PREFIX = process.env.S3_NOTIFICATIONS_PREFIX || "notifications"
-export const S3_NOTIFICATIONS_ENDPOINT = process.env.S3_NOTIFICATIONS_ENDPOINT
-export const S3_NOTIFICATIONS_ACCESS_KEY = process.env.S3_NOTIFICATIONS_ACCESS_KEY
-export const S3_NOTIFICATIONS_SECRET_KEY = process.env.S3_NOTIFICATIONS_SECRET_KEY
-export const S3_NOTIFICATIONS_SERVER_URL = process.env.S3_NOTIFICATIONS_SERVER_URL
+export const S3_NOTIFICATIONS_ENDPOINT = process.env.S3_NOTIFICATIONS_ENDPOINT || S3_ENDPOINT
+export const S3_NOTIFICATIONS_ACCESS_KEY = process.env.S3_NOTIFICATIONS_ACCESS_KEY || S3_ACCESS_KEY
+export const S3_NOTIFICATIONS_SECRET_KEY = process.env.S3_NOTIFICATIONS_SECRET_KEY || S3_SECRET_KEY
+export const S3_NOTIFICATIONS_SERVER_URL = process.env.S3_NOTIFICATIONS_SERVER_URL || S3_SERVER_URL
 
 export const IMAGE_SERVER = process.env.IMAGE_SERVER || (process.env.S3_IMAGES_SERVER_URL || `https://${S3_IMAGES_BUCKET}.s3-${S3_REGION}.amazonaws.com/${S3_IMAGES_PREFIX}`)
 export const IMAGE_PROPERTY_WIDTH = parseInt(process.env.IMAGE_PROPERTY_WIDTH || "1200") || 1200

@@ -130,6 +130,7 @@ const route:BRoute = {
                     to: toProperty.owner,
                     fromProperty: fromProperty.id,
                     toProperty: toProperty.id,
+                    createdAt: new Date().toISOString()
                 }
                 const sr = await dal.create<SwapRequest>(`/items/swap_requests`, data)
 
@@ -150,12 +151,12 @@ const route:BRoute = {
                 "history": {
                     get: async (request, response) => {
                         const u = request.user!
-        
+
                         const qso:any = {
                             "filter": JSON.stringify({"_and":[{"_or": [{"from": u.id}, {"to": u.id}]}, {"status": {"_neq": "pending"}}]}),
                             "fields[]": swapRequestFields
                         }
-        
+
                         const sr = await dal.find<Api.Swaps.SwapRequest>(`/items/swap_requests?${new URLSearchParams(qso).toString()}`)
                         response.status(200).send(sr)
                     },

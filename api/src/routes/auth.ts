@@ -63,7 +63,7 @@ const route:BRoute = {
                     !phone.length
                 )
                     return response.status(400).send({error: "Missing data"})
-                
+
                 const users = await findByEmail(email)
                 if(users.length)
                     return response.status(401).send({error: "User already exists"})
@@ -74,7 +74,8 @@ const route:BRoute = {
                     lastName,
                     phone,
                     gender,
-                    onboarding
+                    onboarding,
+                    createdAt: new Date().toISOString()
                 })
 
                 const host = getAppUrl(request)
@@ -149,7 +150,7 @@ const route:BRoute = {
                 } else if(email) {
                     if(!email || !email.length)
                     return response.status(400).send({error: "Missing data"})
-                
+
                     const users = await findByEmail(email)
                     if(!users.length)
                         return response.status(200).send({message: "Success"}) // We pretend it's a success to avoid leaking emails
@@ -172,14 +173,14 @@ const route:BRoute = {
                     return response.status(404).send({error: "Invalid token"})
                 if(temp.expiry < Date.now())
                     return response.status(404).send({error: "Invalid token"})
-                
+
                 const user = await dal.get<User>(`/items/users/${temp.data}`)
                 if(!user)
                     return response.status(404).send({error: "Invalid token"})
 
                 await dal.delete(`/items/temp/${token}`)
                 await dal.update<User>(`/items/users/${user.id}`, {password: hash(password)})
-                
+
                 response.status(200).send<Api.Auth.ResetPassword>({message: "Success"})
             },
         },
@@ -191,7 +192,7 @@ const route:BRoute = {
                     if(domain.includes("https://app.kazaswap.co")) {
                         priceId="price_1PYPVRCdvZbuHRnNNBkhsK7s" // Production
                     }
-                    const return_url = `${domain}/payments/return.html?session_id={CHECKOUT_SESSION_ID}`                
+                    const return_url = `${domain}/payments/return.html?session_id={CHECKOUT_SESSION_ID}`
                     const session = await stripe().checkout.sessions.create({
                         ui_mode: 'embedded',
                         line_items: [
@@ -211,8 +212,8 @@ const route:BRoute = {
                     if(user) {
                         await redis.save(`payments:${session.id}`, {userId: user.id, priceId}, undefined, 60*60*24*30)
                     }
-                    
-                    response.status(200).send({clientSecret: session.client_secret});   
+
+                    response.status(200).send({clientSecret: session.client_secret});
                 } catch(err) {
                     response.status(500).send({error: "Internal error"})
                 }

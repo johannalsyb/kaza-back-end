@@ -8,3 +8,11 @@ directus/uploads/
 verdaccio/
 airbnb.ts
 api/assets/markerTemplate.bak.svg
+node_modules/*
+
+~/.nvm/*
+api/~/.nvm/*
+./node_modules
+node_modules/bun/*
+node_modules/bun/bin/bun.exe
+node_modules/bun/package.json

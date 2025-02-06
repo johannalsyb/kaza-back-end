@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "cd api && bun run src/server.ts",
+    "start": "cd api && bun run --inspect --watch src/server.ts",
     "watch": "cd api && bun run --watch src/server.ts & cd web && bun run --watch start",
     "migrate": "npm run migrate:up",
     "migrate:up": "docker-compose exec directus npx directus database migrate:up",

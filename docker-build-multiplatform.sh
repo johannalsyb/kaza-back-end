@@ -2,7 +2,7 @@
 
 APP="kazaswap"
 IMAGE=${IMAGE:-"kazaswap"}
-REPO="111014719475.dkr.ecr.eu-west-3.amazonaws.com"
+REPO="904233106121.dkr.ecr.eu-west-3.amazonaws.com"
 TAG=${TAG:-latest}
 AWS_PROFILE=${AWS_PROFILE:-bgr}
 AWS_REGION=${AWS_REGION:-eu-west-3}

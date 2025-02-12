@@ -113,7 +113,7 @@ export default class S3 {
             clients.set(type, this.client)
         }
         this.client = clients.get(type)!
-        this.serverUrl = conf.serverUrl || `https://${conf.bucket}.s3-${conf.region}.amazonaws.com`
+        this.serverUrl = conf.serverUrl || `https://${conf.bucket}.s3.${conf.region}.amazonaws.com`
         this.prefix = conf.prefix || ""
     }
 

@@ -1,7 +1,8 @@
 FROM oven/bun:1 as builder
 WORKDIR /usr/src/app
 
-RUN apt-get update && apt-get install -y wget
+RUN apt-get update && apt-get install -y wget redis-server
+
 RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 RUN export NVM_DIR="$HOME/.nvm" && . $HOME/.nvm/nvm.sh && . $HOME/.nvm/bash_completion && nvm install 20
 
@@ -12,22 +13,39 @@ COPY ./api/package.json ./api/package.json
 RUN export NVM_DIR="$HOME/.nvm" && . $HOME/.nvm/nvm.sh && . $HOME/.nvm/bash_completion && cd api && npm install
 
 # COPY ./common ./common
-
 COPY ./api/tsconfig.json ./api/tsconfig.json
 COPY ./api/src ./api/src
 COPY ./api/assets ./api/assets
-# COPY ./api/.env ./api/.env
+COPY ./api/.env ./api/.env
 # RUN cd api && npm run build
 
 FROM oven/bun:1 as runner
 WORKDIR /api
+
+RUN apt-get update && apt-get install -y redis-server
+
+RUN mkdir -p /etc/redis && echo "supervised no" > /etc/redis/redis.conf && \
+    echo "bind 0.0.0.0" >> /etc/redis/redis.conf && \
+    echo "daemonize yes" >> /etc/redis/redis.conf
+
+RUN mkdir -p /var/run/redis && chown redis:redis /var/run/redis
+
 COPY --from=builder /usr/src/app/api /api
 COPY ./common /common
+
 ENV DIRECTUS_AUTH_BEARER=DIorOGrD9wrh0RFtIon9Im16NtkqXqGL
 ENV DIRECTUS_URL=http://13.38.247.37:8065
+ENV DIRECTUS_QUERY_LIMIT=50
+ENV LOGGING=true
+ENV DEBUG=false
+ENV BASE_URL=https://api.kazaswap.co/
+ENV REDIS_URL=redis://127.0.0.1:6379/0
+ENV REDIS_PORT=6379
+ENV GMAPS_APIKEY=AIzaSyA1LFFwKqtC7bdJTBvP4ye9KaEhb9We2YY
+ENV GMAPS_WEB_APIKEY=AIzaSyA1LFFwKqtC7bdJTBvP4ye9KaEhb9We2YY
 
-# Expose port 4004
-EXPOSE 4004
+# Expose Redis and Application Ports
+EXPOSE 6379 4004
 
-
-CMD [ "bun", "run", "src/server.ts" ]
+# Start Redis on container launch along with Bun application
+CMD redis-server /etc/redis/redis.conf && bun run src/server.ts

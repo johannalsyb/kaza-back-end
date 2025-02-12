@@ -32,7 +32,7 @@ export const DEFAULT_EMAIL = process.env.DEFAULT_EMAIL || "community@kazaswap.co
 export const DEFAULT_EMAIL_NAME = process.env.DEFAULT_EMAIL_NAME || "Kaza Swap"
 export const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "support@kazaswap.co"
 
-export const S3_REGION = process.env.S3_REGION || "eu-west-1"
+export const S3_REGION = process.env.S3_REGION || "eu-west-3"
 export const S3_ACCESS_KEY = process.env.S3_ACCESS_KEY
 export const S3_SECRET_KEY = process.env.S3_SECRET_KEY
 export const S3_ENDPOINT = process.env.S3_ENDPOINT
@@ -63,7 +63,7 @@ export const S3_NOTIFICATIONS_ACCESS_KEY = process.env.S3_NOTIFICATIONS_ACCESS_K
 export const S3_NOTIFICATIONS_SECRET_KEY = process.env.S3_NOTIFICATIONS_SECRET_KEY || S3_SECRET_KEY
 export const S3_NOTIFICATIONS_SERVER_URL = process.env.S3_NOTIFICATIONS_SERVER_URL || S3_SERVER_URL
 
-export const IMAGE_SERVER = process.env.IMAGE_SERVER || (process.env.S3_IMAGES_SERVER_URL || `https://${S3_IMAGES_BUCKET}.s3-${S3_REGION}.amazonaws.com/${S3_IMAGES_PREFIX}`)
+export const IMAGE_SERVER = process.env.IMAGE_SERVER || (process.env.S3_IMAGES_SERVER_URL || `https://${S3_IMAGES_BUCKET}.s3.${S3_REGION}.amazonaws.com/${S3_IMAGES_PREFIX}`)
 export const IMAGE_PROPERTY_WIDTH = parseInt(process.env.IMAGE_PROPERTY_WIDTH || "1200") || 1200
 export const IMAGE_PROPERTY_THUMBNAIL_WIDTH = parseInt(process.env.IMAGE_PROPERTY_THUMBNAIL_WIDTH || "300") || 300
 export const IMAGE_USER_WIDTH = parseInt(process.env.IMAGE_USER_WIDTH || "500") || 500

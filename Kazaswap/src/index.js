@@ -1,10 +1,17 @@
-import * as Sentry from '@sentry/react-native';
+/**
+ * @format
+ */
+import * as Sentry from '@sentry/react-native'; // <-- Add this if not already
+
+import {AppRegistry} from 'react-native';
+import App from './App';
 
 /* Firebase */
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Firebase config...
 const firebaseConfig = {
   apiKey: "AIzaSyDW9P8xHeJiqJk-K3AVyzH6gwz4H1WdJbo",
   authDomain: "kazaswap.firebaseapp.com",
@@ -15,13 +22,13 @@ const firebaseConfig = {
   measurementId: "G-JJZ8RS3NMP"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-
-/* ✅ TEST SENTRY ERROR */
-Sentry.captureException(new Error("💥 Test error from Kazaswap"));
+/* ================== */
 
 AppRegistry.registerComponent("App", () => App);
 AppRegistry.runApplication("App", {
-  rootTag: document.getElementById("react-root")
+    rootTag: document.getElementById("react-root")
 });
+  

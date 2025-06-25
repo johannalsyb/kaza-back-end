@@ -4,10 +4,10 @@ cd /home/ubuntu/kaza-back-end
 echo "Installing dependencies..."
 npm install
 
-echo "Building Kaza containers..."
+echo "Building containers with server config..."
 docker compose -f docker-compose.simple.yml build --no-cache
 
-echo "Starting Kaza containers..."
+echo "Starting containers..."
 docker compose -f docker-compose.simple.yml up -d
 
 echo "Waiting for containers..."
@@ -16,7 +16,7 @@ sleep 10
 echo "Installing AWS CLI in database container..."
 docker exec $(docker compose -f docker-compose.simple.yml ps -q db) sh -c "apt update && apt install -y awscli"
 
-echo "Setting up AWS credentials in container..."
+echo "Setting up AWS credentials..."
 docker exec $(docker compose -f docker-compose.simple.yml ps -q db) mkdir -p /root/.aws
 docker exec $(docker compose -f docker-compose.simple.yml ps -q db) sh -c "cat > /root/.aws/credentials << EOF
 [default]
@@ -28,7 +28,7 @@ docker exec $(docker compose -f docker-compose.simple.yml ps -q db) sh -c "cat >
 region = eu-west-3
 EOF"
 
-echo "Running database migrations..."
+echo "Running migrations..."
 npm run migrate
 
 echo "Restarting nginx..."

@@ -11,6 +11,7 @@ import autocomplete from './autocomplete'
 import admin from "./admin"
 import blog from "./blog"
 import images from './images'
+import contract from './contract'
 
 const route:BRoute = {
     get: (request, response) => {
@@ -26,7 +27,8 @@ const route:BRoute = {
         config,
         admin,
         blog,
-        images
+        images,
+        contract,
     },
     middlewares: [cors]
 }

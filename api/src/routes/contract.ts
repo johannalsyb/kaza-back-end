@@ -7,7 +7,7 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import fs from 'fs';
 import path from 'path';
 
-const FRONTEND_VERIFY_URL = `${BASE_URL}/kaza/contract`;
+const FRONTEND_VERIFY_URL = `https://kazaswap.co/kaza/contract`;
 
 const route: BRoute = {
   routes: {

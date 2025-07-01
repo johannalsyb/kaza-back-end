@@ -302,123 +302,131 @@ const route: BRoute = {
 
 
     'generate-pdf': {
-      post: async (req, res) => {
-        try {
-          const { contract_id } = req.body;
+  post: async (req, res) => {
+    try {
+      const { contract_id } = req.body;
 
-          if (!contract_id) {
-            return res.status(400).send({ error: 'Missing contract_id' });
-          }
-
-          // Fetch contract
-          const contractRes = await fetchRequest(`${DIRECTUS_URL}/items/contract/${contract_id}`, {
-            headers: { Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}` },
-          });
-          const contractJson = await contractRes.json();
-          const contract = contractJson?.data;
-          if (!contract) {
-            return res.status(404).send({ error: 'Contract not found' });
-          }
-
-          // Fetch host & guest
-          const detailsRes = await fetchRequest(`${DIRECTUS_URL}/items/contract_details?filter[contract_id][_eq]=${contract_id}`, {
-            headers: { Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}` },
-          });
-          const detailsJson = await detailsRes.json();
-          const host = detailsJson?.data?.find((d: any) => d.role === 'host');
-          const guest = detailsJson?.data?.find((d: any) => d.role === 'guest');
-          if (!host || !guest) {
-            return res.status(404).send({ error: 'Host or Guest not found' });
-          }
-
-          // Create PDF
-          const pdfDoc = await PDFDocument.create();
-          const page = pdfDoc.addPage();
-          const { width, height } = page.getSize();
-          const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-          const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-
-          // Embed logo
-          const logoPath = path.resolve(__dirname, '../../assets/KazaSwap_horizontal logo_black and yellow.png');
-          const logoBytes = fs.readFileSync(logoPath);
-          const logoImage = await pdfDoc.embedPng(logoBytes);
-
-          const logoWidth = 110.74;
-          const logoHeight = 43.73;
-          const topMargin = 100;
-
-          page.drawImage(logoImage, {
-            x: (width - logoWidth) / 2,
-            y: height - topMargin,
-            width: logoWidth,
-            height: logoHeight,
-          });
-
-          // Title below logo
-          const title = 'Generated Contract';
-          const titleSize = 14;
-          const titleWidth = boldFont.widthOfTextAtSize(title, titleSize);
-
-          const titleY = height - topMargin - logoHeight - 30;
-          page.drawText(title, {
-            x: (width - titleWidth) / 2,
-            y: titleY,
-            size: titleSize,
-            font: boldFont,
-            color: rgb(0, 0, 0),
-          });
-
-          // Body content
-          const lines = [
-            ``,
-            `This contract is made between ${host.name} (Host) and ${guest.name} (Guest).`,
-            `The swap will take place from ${contract.start_date} to ${contract.end_date}.`,
-            ``,
-            `The Host agrees to provide access to their home for the duration of this period.`,
-            `Any changes to the agreed dates must be communicated by the Host to the Guest`,
-            `in advance, so appropriate arrangements can be made.`,
-            `The Host confirms that the home is described as ${host.cleanliness || 'N/A'}.`,
-            ``,
-            `The Guest is expected to maintain the cleanliness of the home and leave it in`,
-            `the same condition it was found.`,
-            `The Guest expects the place to be ${host.cleanliness} upon arrival and agrees to`,
-            `${guest.expectations?.trash ? 'take out the trash' : 'no trash duties'} before departure. The Guest will ${guest.rules?.petsAllowed ? '' : 'not '}bring pets`,
-            `and Smoking is ${guest.rules?.smokingAllowed ? 'allowed' : 'not allowed'}.`,
-            ``,
-            `Both parties agree to:`,
-            `• Share photos of their homes to show the current condition.`,
-            `• Arrange a call before the swap to ensure expectations are aligned.`,
-            ``,
-            `Date of Agreement: ${new Date().toISOString().split('T')[0]}`,
-          ];
-
-          let y = titleY - 50;
-          for (const line of lines) {
-            page.drawText(line, {
-              x: 50,
-              y,
-              size: 12,
-              font,
-              color: rgb(0, 0, 0),
-            });
-            y -= 16; // tighter spacing
-          }
-
-          const pdfBytes = await pdfDoc.save();
-          const base64 = Buffer.from(pdfBytes).toString('base64');
-
-          return res.status(200).send({
-            message: 'PDF generated successfully.',
-            pdf: base64,
-            filename: `contract-${contract_id}.pdf`,
-            contentType: 'application/pdf',
-          });
-        } catch (err) {
-          console.error('❌ PDF Generation Error:', err);
-          return res.status(500).send({ error: 'Internal Server Error' });
-        }
+      if (!contract_id) {
+        return res.status(400).send({ error: 'Missing contract_id' });
       }
+
+      // Fetch contract
+      const contractRes = await fetchRequest(`${DIRECTUS_URL}/items/contract/${contract_id}`, {
+        headers: { Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}` },
+      });
+      const contractJson = await contractRes.json();
+      const contract = contractJson?.data;
+      if (!contract) {
+        return res.status(404).send({ error: 'Contract not found' });
+      }
+
+      // Fetch host & guest
+      const detailsRes = await fetchRequest(`${DIRECTUS_URL}/items/contract_details?filter[contract_id][_eq]=${contract_id}`, {
+        headers: { Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}` },
+      });
+      const detailsJson = await detailsRes.json();
+      const host = detailsJson?.data?.find((d: any) => d.role === 'host');
+      const guest = detailsJson?.data?.find((d: any) => d.role === 'guest');
+      if (!host || !guest) {
+        return res.status(404).send({ error: 'Host or Guest not found' });
+      }
+
+      // Create PDF
+      const pdfDoc = await PDFDocument.create();
+      const page = pdfDoc.addPage();
+      const { width, height } = page.getSize();
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+      // Embed logo
+      const logoPath = path.resolve(__dirname, '../../assets/KazaSwap_horizontal logo_black and yellow.png');
+      const logoBytes = fs.readFileSync(logoPath);
+      const logoImage = await pdfDoc.embedPng(logoBytes);
+
+      const logoWidth = 110.74;
+      const logoHeight = 43.73;
+      const topMargin = 100;
+
+      page.drawImage(logoImage, {
+        x: (width - logoWidth) / 2,
+        y: height - topMargin,
+        width: logoWidth,
+        height: logoHeight,
+      });
+
+      // Title below logo
+      const title = 'Generated Contract';
+      const titleSize = 18;
+      const titleWidth = boldFont.widthOfTextAtSize(title, titleSize);
+
+      const titleY = height - topMargin - logoHeight - 10;
+      page.drawText(title, {
+        x: (width - titleWidth) / 2,
+        y: titleY,
+        size: titleSize,
+        font: boldFont,
+        color: rgb(0, 0, 0),
+      });
+      const formattedDate = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit'
+      });
+
+      // Body content with left padding
+      const lines = [
+        ``,
+        `This contract is made between ${host.name} (referred to as the Host) and`,
+        `${guest.name} (referred to as the Guest).`,
+        `The swap will take place from ${contract.start_date} to ${contract.end_date}.`,
+        ``,
+        `The Host agrees to provide access to their home for the duration of this period.`,
+        `Any changes to the agreed dates must be communicated by the Host to the`,
+        `Guest in advance, so appropriate arrangements can be made.`,
+        `The Host confirms that the home is described as ${host.cleanliness || 'N/A'}.`,
+        ``,
+        `The Guest is expected to maintain the cleanliness of the home and leave it in`,
+        `the same condition it was found.`,
+        `The Guest expects the place to be ${host.cleanliness} upon arrival and agrees to`,
+        `${guest.expectations?.trash ? 'take out the trash' : 'no trash duties'} before departure. The Guest will ${guest.rules?.petsAllowed ? '' : 'not '}bring pets`,
+        `and is considered smoking ${guest.rules?.smokingAllowed ? 'allowed' : 'not allowed'}.`,
+        ``,
+        `Both parties agree to:`,
+        `• Share photos of their homes to show the current condition.`,
+        `• Arrange a call before the swap to ensure expectations are aligned.`,
+        ``,
+        `Date of Agreement: ${formattedDate}`,
+      ];
+
+      const leftPadding = 82; // 1 inch padding (72 points = 1 inch)
+      let y = titleY - 30;
+      
+      for (const line of lines) {
+        page.drawText(line, {
+          x: leftPadding, // Apply consistent left padding
+          y,
+          size: 12,
+          font,
+          color: rgb(140 / 255, 140 / 255, 140 / 255), 
+        });
+        y -= 20; // Slightly reduced line spacing for better readability
+      }
+
+      const pdfBytes = await pdfDoc.save();
+      const base64 = Buffer.from(pdfBytes).toString('base64');
+
+      return res.status(200).send({
+        message: 'PDF generated successfully.',
+        pdf: base64,
+        filename: `${host.name}-contract-houseSwap.pdf`,
+        contentType: 'application/pdf',
+      });
+    } catch (err) {
+      console.error('❌ PDF Generation Error:', err);
+      return res.status(500).send({ error: 'Internal Server Error' });
     }
+  }
+}
   }
 };
 

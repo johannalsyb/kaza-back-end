@@ -9,6 +9,7 @@ import path from 'path';
 
 const FRONTEND_VERIFY_URL = `https://kazaswap.co/contract`;
 
+
 const route: BRoute = {
   routes: {
     submit: {

@@ -368,18 +368,29 @@ const route: BRoute = {
         font: boldFont,
         color: rgb(0, 0, 0),
       });
-      const formattedDate = new Date().toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: '2-digit'
-      });
+     const formatDate = (date: string | number | Date): string => {
+  if (!date) return 'Invalid Date';
+  const parsedDate = new Date(date);
+  if (isNaN(parsedDate.getTime())) return 'Invalid Date';
+
+  return parsedDate.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+  });
+};
+
+
+const formattedDate = formatDate(new Date());
+const formattedStartDate = formatDate(contract.start_date);
+const formattedEndDate = formatDate(contract.end_date);
 
       // Body content with left padding
       const lines = [
         ``,
         `This contract is made between ${host.name} (referred to as the Host) and`,
         `${guest.name} (referred to as the Guest).`,
-        `The swap will take place from ${contract.start_date} to ${contract.end_date}.`,
+        `The swap will take place from ${formattedStartDate} to ${formattedEndDate}.`,
         ``,
         `The Host agrees to provide access to their home for the duration of this period.`,
         `Any changes to the agreed dates must be communicated by the Host to the`,

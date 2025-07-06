@@ -36,6 +36,8 @@ export type User = PublicUser & {
     onboarding: string | null,
     newMatches?: number
     payment: string | null
+    registrationProvider?: string,
+    
 }
 
 export default User

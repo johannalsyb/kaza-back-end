@@ -168,7 +168,7 @@ export default ({
       {!isMobile && <View style={{position: "absolute", top: 20, right: 20}}>
             <KText onPress={() => {
                 navigation.navigate('Home')
-            }}>{"> Look around"}</KText>
+            }}>{"Look around"}</KText>
         </View>}
       {!isMobile && <KText style={{position: "absolute", bottom: 20, right: 20, fontSize: 13, color: "black"}}>
         ♥️ Made by friends

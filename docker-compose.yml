@@ -19,11 +19,16 @@ services:
       ADMIN_EMAIL: bengous@yopmail.com
       ADMIN_PASSWORD: abcDEF123!
       DB_CLIENT: mysql
-      DB_HOST: kazaswap.cx6yguoe2dhw.eu-west-3.rds.amazonaws.com
+      # DB_HOST: kazaswap.cx6yguoe2dhw.eu-west-3.rds.amazonaws.com
       DB_PORT: 3306
-      DB_DATABASE: kazaswap
-      DB_USER: admin
-      DB_PASSWORD: n8w9*gL*TlP7h%b5VCIBWw%&
+      # DB_DATABASE: kazaswap
+      # DB_USER: admin
+      # DB_PASSWORD: n8w9*gL*TlP7h%b5VCIBWw%&
+      DB_HOST: db
+      # DB_PORT: 3306
+      DB_DATABASE: kaza
+      DB_USER: kaza
+      DB_PASSWORD: kaza
       DB_CHARSET: utf8mb4
       KEY: eWBcYgfq9i
       SECRET: v8qb9Bfyex

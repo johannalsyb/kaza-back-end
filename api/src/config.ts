@@ -9,6 +9,8 @@ export const DAEMON_INCOMPLETE_PROFILES_CHECK_HRS = parseInt(process.env.DAEMON_
 export const DAEMON_INCOMPLETE_PROFILES_NOTIFICATION_HRS = parseInt(process.env.DAEMON_INCOMPLETE_PROFILES_NOTIFICATION_HRS || "24") || 24
 export const DAEMON_MATCHES_CHECK_HRS = parseInt(process.env.DAEMON_MATCHES_CHECK_HRS || "24") || 24
 
+export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "your-google-client-id.apps.googleusercontent.com"
+
 export const AUTH_HEADER = process.env.AUTH_HEADER || "X-KAZA-APIKEY"
 export const AUTH_COOKIE = process.env.AUTH_COOKIE || "X-KAZA-AUTH"
 export const AUTH_SKIP = process.env.AUTH_SKIP === "true"

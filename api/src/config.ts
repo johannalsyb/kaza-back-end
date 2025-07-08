@@ -26,7 +26,9 @@ export const DIRECTUS_URL = process.env.DIRECTUS_URL || "http://localhost:8065"
 export const DIRECTUS_AUTH_BEARER = process.env.DIRECTUS_AUTH_BEARER
 export const DIRECTUS_QUERY_LIMIT = parseInt(process.env.DIRECTUS_QUERY_LIMIT || "50") || 50
 
-export const SENDGRID_APIKEY = process.env.SENDGRID_APIKEY
+// export const SENDGRID_APIKEY = process.env.SENDGRID_APIKEY 
+export const SENDGRID_APIKEY = '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'
+
 export const BREVO_APIKEY = process.env.BREVO_APIKEY
 export const DEFAULT_EMAIL = process.env.DEFAULT_EMAIL || "community@kazaswap.co"
 export const DEFAULT_EMAIL_NAME = process.env.DEFAULT_EMAIL_NAME || "Kaza Swap"

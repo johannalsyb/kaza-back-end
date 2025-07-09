@@ -242,16 +242,11 @@ const route: BRoute = {
 
                 if (fromSite.startsWith("http://localhost")) sameSite = "None"
                 const { body } = request
-                // const tokenInfo = await client.getTokenInfo(
-                //     body.access_token
-                // )
-                // console.log(tokenInfo)
                 const ticket = await client.verifyIdToken({
                     idToken: body.token,
                     audience: GOOGLE_CLIENT_ID,
                 })
                 const payload = ticket.getPayload()
-                console.log('payload', payload)
                 if (payload && payload.email_verified) {
                     let user = (await findByEmail(payload.email!))[0]
                     if (!user) {

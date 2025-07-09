@@ -84,6 +84,7 @@ export const autocomplete = async (address:string) => {
         let auto:Api.Autocomplete.Response | null = await redis.get(`lookup:autocomplete:${hash}`) as Api.Autocomplete.Response | null
         if(!auto) {
             const results = await gmaps.autocomplete(address)
+            console.log('results', results);
             auto = {address, ts: Date.now(), results}
             await redis.save(`lookup:autocomplete:${hash}`, auto, undefined, 30*3600*24*7) // 30 weeks
                 .catch(err => {

@@ -1,0 +1,26 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - staging-kaza-api-directus
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_KEY }}
+          script: |
+            cd /home/ubuntu/kaza-back-end
+            docker-compose -f docker-compose.simple.yml down
+            docker system prune -f
+            docker-compose -f docker-compose.simple.yml up -d --build

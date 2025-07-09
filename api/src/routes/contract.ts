@@ -6,9 +6,11 @@ import sendEmail from '../services/email';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import fs from 'fs';
 import path from 'path';
+import Translation from '../../../common/src/types/Translation';
+import { dal } from '../dal';
 
-const FRONTEND_VERIFY_URL = `https://kazaswap.co/contract`;
-
+// const FRONTEND_VERIFY_URL = `https://kazaswap.co/contract`;
+const FRONTEND_VERIFY_URL = `http://localhost:9732/contract`;
 
 const route: BRoute = {
   routes: {
@@ -247,50 +249,60 @@ const route: BRoute = {
       if (!recipients.length) {
         return res.status(404).send({ error: 'No valid recipients found (host or guest)' });
       }
+      // 4. Generate verification URL
+//       const promises = recipients.map((recipient: { email: string; name: string }) =>
+//   sendEmail({
+//     to: [recipient],
+//     subject: 'Verify your contract',
+//     content: `
+//   <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+//     <p>Dear ${recipient.name}!</p>
 
+//     <p>
+//       You’ve been invited to complete a home swap agreement through KazaSwap.
+//       One party has already submitted their details, and we now need your confirmation to finalize the contract.
+//     </p>
+
+//     <p>
+//       Please review and complete your part of the contract using the secure link below:
+//     </p>
+
+//     <p style="margin: 20px 0;">
+//       <a href="%url%" style="background-color: #f8c133; padding: 10px 20px; color: #000; text-decoration: none; font-weight: bold; border-radius: 4px;">
+//         Complete Your Contract
+//       </a>
+//     </p>
+
+//     <p>
+//       This link is valid until <strong>${new Date(contract.verification_expires_at).toLocaleDateString()}</strong>. 
+//       Please ensure your information is submitted before the deadline.
+//     </p>
+
+//     <p>
+//       If you have any questions or did not expect this message, please reach out to our support team at support@kazaswap.com.
+//     </p>
+
+//     <p>Best regards,<br />The KazaSwap Team</p>
+//   </div>
+// `,
+//     // contentType: 'text/html',
+//   })
+// );
       // 4. Send email to each participant
-      const verifyUrl = `${FRONTEND_VERIFY_URL}?token=${contract.verification_token}`;
-      const promises = recipients.map((recipient: { email: string; name: string }) =>
-  sendEmail({
-    to: [recipient],
-    subject: 'Verify your contract',
-    content: `
-  <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
-    <p>Dear ${recipient.name},</p>
+    const verifyUrl = `${FRONTEND_VERIFY_URL}?token=${contract.verification_token}`;
 
-    <p>
-      You’ve been invited to complete a home swap agreement through KazaSwap.
-      One party has already submitted their details, and we now need your confirmation to finalize the contract.
-    </p>
-
-    <p>
-      Please review and complete your part of the contract using the secure link below:
-    </p>
-
-    <p style="margin: 20px 0;">
-      <a href="${verifyUrl}" style="background-color: #f8c133; padding: 10px 20px; color: #000; text-decoration: none; font-weight: bold; border-radius: 4px;">
-        Complete Your Contract
-      </a>
-    </p>
-
-    <p>
-      This link is valid until <strong>${new Date(contract.verification_expires_at).toLocaleDateString()}</strong>. 
-      Please ensure your information is submitted before the deadline.
-    </p>
-
-    <p>
-      If you have any questions or did not expect this message, please reach out to our support team at support@kazaswap.com.
-    </p>
-
-    <p>Best regards,<br />The KazaSwap Team</p>
-  </div>
-`,
-
-    contentType: 'text/html',
-  })
-);
-
-      await Promise.all(promises);
+    const translations = await dal.find<Translation>(`/items/translations?filter=${JSON.stringify({"_or": [{id: "email_houseswap_contract"}, {id: "email_houseswap_contract"}]})}`)
+    const emailTemplate = translations.find((t:any) => t.id === "email_houseswap_contract")!
+    emailTemplate.english = emailTemplate.english.startsWith("file://") ? fs.readFileSync(emailTemplate.english.replace("file:/", "."), { encoding: "utf8" }) : emailTemplate.english
+    emailTemplate.english = emailTemplate.english.replaceAll("%url%", verifyUrl)
+    const emailTitle = translations.find((t:any) => t.id === "email_resetpassword_title")!
+    const email = {
+        to: [{email: recipients, name: contract.name}],
+        content: emailTemplate.english,
+        subject: "Share Contract - KazaSwap",
+    }
+    await sendEmail({...email, contentType: "text/html"})
+      // await Promise.all(promises);
 
       return res.status(200).send({ message: 'Verification emails sent successfully.' });
     } catch (error) {

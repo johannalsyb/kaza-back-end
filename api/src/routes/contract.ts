@@ -9,8 +9,6 @@ import path from "path";
 import fs2 from "fs/promises";
 
 // Path to your HTML email template
-const templatePath = path.join(__dirname, "../../assets/emails/house_swap_contract.html");
-
 const FRONTEND_VERIFY_URL = `https://kazaswap.co/contract`;
 
 const route: BRoute = {
@@ -256,8 +254,37 @@ const route: BRoute = {
       if (!recipients.length) {
         return res.status(404).send({ error: 'No valid recipients found (host or guest)' });
       }
+      console.log('Recipient:', recipients);
+
+
       // 4. Load and fill the HTML template
-      const rawHtml = await fs.readFile(templatePath, 'utf8');
+      // 4. Load email template from Directus translations
+const transRes = await fetchRequest(
+  `${DIRECTUS_URL}/items/translations?filter=${encodeURIComponent(JSON.stringify({
+    _or: [
+      { id: "email_houseswap_contract" }
+    ]
+  }))}`,
+  {
+    headers: { Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}` },
+  }
+);
+
+const transJson = await transRes.json();
+const translations = transJson?.data || [];
+
+const templateItem = translations.find((t: { id: any; }) => t.id === "email_houseswap_contract");
+
+
+if (!templateItem) {
+  return res.status(500).send({ error: 'Email template or subject not found in Directus' });
+}
+
+let rawHtml = templateItem.english;
+if (rawHtml.startsWith("file://")) {
+  rawHtml = await fs.readFile(rawHtml.replace("file:/", "."), { encoding: "utf8" });
+}
+
       const verifyUrl = `${FRONTEND_VERIFY_URL}?token=${contract.verification_token}`;
       const expiry = new Date(contract.verification_expires_at).toLocaleDateString();
 

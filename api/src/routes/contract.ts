@@ -3,12 +3,13 @@ import { request as fetchRequest } from '../utils';
 import { DIRECTUS_URL, DIRECTUS_AUTH_BEARER,BASE_URL } from '../config';
 import crypto from 'crypto';
 import sendEmail from '../services/email';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
-import fs from 'fs';
-import path from 'path';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';;
+import fs from "fs/promises";
+import path from "path";
+import fs2 from "fs/promises";
 
+// Path to your HTML email template
 const FRONTEND_VERIFY_URL = `https://kazaswap.co/contract`;
-
 
 const route: BRoute = {
   routes: {
@@ -216,7 +217,11 @@ const route: BRoute = {
         return res.status(400).send({ error: 'Missing contract_id' });
       }
 
-      // 1. Fetch the contract
+      // Capitalize helper
+      const capitalize = (str:any) =>
+        str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : '';
+
+      // 1. Fetch contract
       const contractRes = await fetchRequest(`${DIRECTUS_URL}/items/contract/${contract_id}`, {
         headers: { Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}` },
       });
@@ -227,7 +232,7 @@ const route: BRoute = {
         return res.status(404).send({ error: 'Contract not found or invalid' });
       }
 
-      // 2. Fetch both host and guest details
+      // 2. Fetch host & guest details
       const detailsRes = await fetchRequest(
         `${DIRECTUS_URL}/items/contract_details?filter[contract_id][_eq]=${contract_id}`,
         {
@@ -237,58 +242,67 @@ const route: BRoute = {
       const detailsJson = await detailsRes.json();
       const allDetails = detailsJson?.data || [];
 
-      // 3. Prepare recipients (only if name + email present)
+      // 3. Prepare recipients
       const recipients = allDetails
-        .filter((d: any) => d.email && d.name)
-        .map((d: any) => ({
+        .filter((d:any) => d.email && (d.name || d.surname))
+        .map((d:any) => ({
           email: d.email,
-          name: d.name,
+          name: capitalize(d.name),
+          surname: capitalize(d.surname),
         }));
+
       if (!recipients.length) {
         return res.status(404).send({ error: 'No valid recipients found (host or guest)' });
       }
+      console.log('Recipient:', recipients);
 
-      // 4. Send email to each participant
-      const verifyUrl = `${FRONTEND_VERIFY_URL}?token=${contract.verification_token}`;
-      const promises = recipients.map((recipient: { email: string; name: string }) =>
-  sendEmail({
-    to: [recipient],
-    subject: 'Verify your contract',
-    content: `
-  <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
-    <p>Dear ${recipient.name},</p>
 
-    <p>
-      You’ve been invited to complete a home swap agreement through KazaSwap.
-      One party has already submitted their details, and we now need your confirmation to finalize the contract.
-    </p>
-
-    <p>
-      Please review and complete your part of the contract using the secure link below:
-    </p>
-
-    <p style="margin: 20px 0;">
-      <a href="${verifyUrl}" style="background-color: #f8c133; padding: 10px 20px; color: #000; text-decoration: none; font-weight: bold; border-radius: 4px;">
-        Complete Your Contract
-      </a>
-    </p>
-
-    <p>
-      This link is valid until <strong>${new Date(contract.verification_expires_at).toLocaleDateString()}</strong>. 
-      Please ensure your information is submitted before the deadline.
-    </p>
-
-    <p>
-      If you have any questions or did not expect this message, please reach out to our support team at support@kazaswap.com.
-    </p>
-
-    <p>Best regards,<br />The KazaSwap Team</p>
-  </div>
-`,
-
-    contentType: 'text/html',
-  })
+      // 4. Load and fill the HTML template
+      // 4. Load email template from Directus translations
+const transRes = await fetchRequest(
+  `${DIRECTUS_URL}/items/translations?filter=${encodeURIComponent(JSON.stringify({
+    _or: [
+      { id: "email_houseswap_contract" }
+    ]
+  }))}`,
+  {
+    headers: { Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}` },
+  }
 );
+
+const transJson = await transRes.json();
+const translations = transJson?.data || [];
+
+const templateItem = translations.find((t: { id: any; }) => t.id === "email_houseswap_contract");
+
+
+if (!templateItem) {
+  return res.status(500).send({ error: 'Email template or subject not found in Directus' });
+}
+
+let rawHtml = templateItem.english;
+if (rawHtml.startsWith("file://")) {
+  rawHtml = await fs.readFile(rawHtml.replace("file:/", "."), { encoding: "utf8" });
+}
+
+      const verifyUrl = `${FRONTEND_VERIFY_URL}?token=${contract.verification_token}`;
+      const expiry = new Date(contract.verification_expires_at).toLocaleDateString();
+
+      // 5. Send email to each recipient
+      const promises = recipients.map((recipient:any) => {
+        const personalizedHtml = rawHtml
+          .replace(/%name%/g, recipient.name)
+          .replace(/%surname%/g, recipient.surname)
+          .replace(/%url%/g, verifyUrl)
+          .replace(/%expires_at%/g, expiry);
+
+        return sendEmail({
+          to: [{ email: recipient.email, name: `${recipient.name} ${recipient.surname}` }],
+          subject: 'Share Contract - KazaSwap',
+          content: personalizedHtml,
+          contentType: 'text/html',
+        });
+      });
 
       await Promise.all(promises);
 
@@ -299,6 +313,8 @@ const route: BRoute = {
     }
   },
 },
+
+
 
 
     'generate-pdf': {
@@ -340,7 +356,7 @@ const route: BRoute = {
 
       // Embed logo
       const logoPath = path.resolve(__dirname, '../../assets/KazaSwap_horizontal logo_black and yellow.png');
-      const logoBytes = fs.readFileSync(logoPath);
+      const logoBytes = await fs2.readFile(logoPath);
       const logoImage = await pdfDoc.embedPng(logoBytes);
 
       const logoWidth = 110.74;
@@ -387,96 +403,41 @@ const formattedEndDate = formatDate(contract.end_date);
       // Body content with left padding
       const lines = [
         ``,
-        `This contract is made between <b>${host.name} ${host.surname}</b> (referred to as the Host) and`,
-        `<b>${guest.name} ${guest.surname}</b> (referred to as the Guest).`,
-        `The swap will take place from <b>${formattedStartDate}</b> to <b>${formattedEndDate}</b>.`,
+        `This contract is made between ${host.name} (referred to as the Host) and`,
+        `${guest.name} (referred to as the Guest).`,
+        `The swap will take place from ${formattedStartDate} to ${formattedEndDate}.`,
         ``,
         `The Host agrees to provide access to their home for the duration of this period.`,
         `Any changes to the agreed dates must be communicated by the Host to the`,
         `Guest in advance, so appropriate arrangements can be made.`,
-        `The Host confirms that the home is described as <b>${host.cleanliness || 'N/A'}</b>.`,
+        `The Host confirms that the home is described as ${host.cleanliness || 'N/A'}.`,
         ``,
         `The Guest is expected to maintain the cleanliness of the home and leave it in`,
         `the same condition it was found.`,
-        `The Guest expects the place to be <b>${host.cleanliness} </b> upon arrival and agrees to`,
-        `<b>${guest.expectations?.trash ? 'take out the trash' : 'no trash duties'}</b> before departure. The Guest will <b>${guest.rules?.petsAllowed ? '' : 'not '}</b> bring pets`,
-        `and is considered smoking <b>${guest.rules?.smokingAllowed ? 'allowed' : 'not allowed'}</b>.`,
+        `The Guest expects the place to be ${host.cleanliness} upon arrival and agrees to`,
+        `${guest.expectations?.trash ? 'take out the trash' : 'no trash duties'} before departure. The Guest will ${guest.rules?.petsAllowed ? '' : 'not '}bring pets`,
+        `and is considered smoking ${guest.rules?.smokingAllowed ? 'allowed' : 'not allowed'}.`,
         ``,
         `Both parties agree to:`,
         `• Share photos of their homes to show the current condition.`,
         `• Arrange a call before the swap to ensure expectations are aligned.`,
         ``,
-        `Date of Agreement: <b>${formattedDate}</b>`,
+        `Date of Agreement: ${formattedDate}`,
       ];
 
       const leftPadding = 82; // 1 inch padding (72 points = 1 inch)
       let y = titleY - 30;
       
-      // for (const line of lines) {
-      //   page.drawText(line, {
-      //     x: leftPadding, // Apply consistent left padding
-      //     y,
-      //     size: 12,
-      //     font,
-      //     color: rgb(140 / 255, 140 / 255, 140 / 255), 
-      //   });
-      //   y -= 20; // Slightly reduced line spacing for better readability
-      // }
-// Function to draw text with bold formatting
-const drawFormattedText = (text: string, x: number, y: number) => {
-  // Split the text by bold tags
-  const parts = text.split(/(<b>|<\/b>)/);
-  let currentX = x;
-  let isBold = false;
-
-  for (const part of parts) {
-    if (part === '<b>') {
-      isBold = true;
-      continue;
-    }
-    if (part === '</b>') {
-      isBold = false;
-      continue;
-    }
-    
-    if (part.trim().length > 0) {
-      page.drawText(part, {
-        x: currentX,
-        y,
-        size: 12,
-        font: isBold ? boldFont : font,
-        color: rgb(140 / 255, 140 / 255, 140 / 255),
-      });
-      // Move the x position based on the text width
-      currentX += (isBold ? boldFont : font).widthOfTextAtSize(part, 12);
-    }
-  }
-};
-
-// Draw each line with proper formatting
-for (const line of lines) {
-  if (line.trim() === '') {
-    y -= 20; // Empty line spacing
-    continue;
-  }
-
-  if (line.startsWith('•')) {
-    // Handle bullet points
-    page.drawText('•', {
-      x: leftPadding,
-      y,
-      size: 12,
-      font,
-      color: rgb(140 / 255, 140 / 255, 140 / 255),
-    });
-    drawFormattedText(line.slice(1), leftPadding + 10, y);
-  } else {
-    // Regular line
-    drawFormattedText(line, leftPadding, y);
-  }
-  
-  y -= 20; // Move to next line
-}
+      for (const line of lines) {
+        page.drawText(line, {
+          x: leftPadding, // Apply consistent left padding
+          y,
+          size: 12,
+          font,
+          color: rgb(140 / 255, 140 / 255, 140 / 255), 
+        });
+        y -= 20; // Slightly reduced line spacing for better readability
+      }
 
       const pdfBytes = await pdfDoc.save();
       const base64 = Buffer.from(pdfBytes).toString('base64');

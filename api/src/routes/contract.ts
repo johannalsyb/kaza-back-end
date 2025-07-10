@@ -317,7 +317,7 @@ if (rawHtml.startsWith("file://")) {
 
 
 
-    'generate-pdf': {
+   'generate-pdf': {
   post: async (req, res) => {
     try {
       const { contract_id } = req.body;
@@ -403,41 +403,96 @@ const formattedEndDate = formatDate(contract.end_date);
       // Body content with left padding
       const lines = [
         ``,
-        `This contract is made between ${host.name} (referred to as the Host) and`,
-        `${guest.name} (referred to as the Guest).`,
-        `The swap will take place from ${formattedStartDate} to ${formattedEndDate}.`,
+        `This contract is made between <b>${host.name} ${host.surname}</b> (referred to as the Host) and`,
+        `<b>${guest.name} ${guest.surname}</b> (referred to as the Guest).`,
+        `The swap will take place from <b>${formattedStartDate}</b> to <b>${formattedEndDate}</b>.`,
         ``,
         `The Host agrees to provide access to their home for the duration of this period.`,
         `Any changes to the agreed dates must be communicated by the Host to the`,
         `Guest in advance, so appropriate arrangements can be made.`,
-        `The Host confirms that the home is described as ${host.cleanliness || 'N/A'}.`,
+        `The Host confirms that the home is described as <b>${host.cleanliness || 'N/A'}</b>.`,
         ``,
         `The Guest is expected to maintain the cleanliness of the home and leave it in`,
         `the same condition it was found.`,
-        `The Guest expects the place to be ${host.cleanliness} upon arrival and agrees to`,
-        `${guest.expectations?.trash ? 'take out the trash' : 'no trash duties'} before departure. The Guest will ${guest.rules?.petsAllowed ? '' : 'not '}bring pets`,
-        `and is considered smoking ${guest.rules?.smokingAllowed ? 'allowed' : 'not allowed'}.`,
+        `The Guest expects the place to be <b>${host.cleanliness} </b> upon arrival and agrees to`,
+        `<b>${guest.expectations?.trash ? 'take out the trash' : 'no trash duties'}</b> before departure. The Guest will <b>${guest.rules?.petsAllowed ? '' : 'not '}</b> bring pets`,
+        `and is considered smoking <b>${guest.rules?.smokingAllowed ? 'allowed' : 'not allowed'}</b>.`,
         ``,
         `Both parties agree to:`,
         `• Share photos of their homes to show the current condition.`,
         `• Arrange a call before the swap to ensure expectations are aligned.`,
         ``,
-        `Date of Agreement: ${formattedDate}`,
+        `Date of Agreement: <b>${formattedDate}</b>`,
       ];
 
       const leftPadding = 82; // 1 inch padding (72 points = 1 inch)
       let y = titleY - 30;
       
-      for (const line of lines) {
-        page.drawText(line, {
-          x: leftPadding, // Apply consistent left padding
-          y,
-          size: 12,
-          font,
-          color: rgb(140 / 255, 140 / 255, 140 / 255), 
-        });
-        y -= 20; // Slightly reduced line spacing for better readability
-      }
+      // for (const line of lines) {
+      //   page.drawText(line, {
+      //     x: leftPadding, // Apply consistent left padding
+      //     y,
+      //     size: 12,
+      //     font,
+      //     color: rgb(140 / 255, 140 / 255, 140 / 255), 
+      //   });
+      //   y -= 20; // Slightly reduced line spacing for better readability
+      // }
+// Function to draw text with bold formatting
+const drawFormattedText = (text: string, x: number, y: number) => {
+  // Split the text by bold tags
+  const parts = text.split(/(<b>|<\/b>)/);
+  let currentX = x;
+  let isBold = false;
+
+  for (const part of parts) {
+    if (part === '<b>') {
+      isBold = true;
+      continue;
+    }
+    if (part === '</b>') {
+      isBold = false;
+      continue;
+    }
+    
+    if (part.trim().length > 0) {
+      page.drawText(part, {
+        x: currentX,
+        y,
+        size: 12,
+        font: isBold ? boldFont : font,
+        color: rgb(140 / 255, 140 / 255, 140 / 255),
+      });
+      // Move the x position based on the text width
+      currentX += (isBold ? boldFont : font).widthOfTextAtSize(part, 12);
+    }
+  }
+};
+
+// Draw each line with proper formatting
+for (const line of lines) {
+  if (line.trim() === '') {
+    y -= 20; // Empty line spacing
+    continue;
+  }
+
+  if (line.startsWith('•')) {
+    // Handle bullet points
+    page.drawText('•', {
+      x: leftPadding,
+      y,
+      size: 12,
+      font,
+      color: rgb(140 / 255, 140 / 255, 140 / 255),
+    });
+    drawFormattedText(line.slice(1), leftPadding + 10, y);
+  } else {
+    // Regular line
+    drawFormattedText(line, leftPadding, y);
+  }
+  
+  y -= 20; // Move to next line
+}
 
       const pdfBytes = await pdfDoc.save();
       const base64 = Buffer.from(pdfBytes).toString('base64');

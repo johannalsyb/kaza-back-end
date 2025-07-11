@@ -25,3 +25,4 @@ nginx.optimized.conf
 setup-backup.sh
 test-local.sh
 test.txt
+redis-data

@@ -130,7 +130,6 @@ const route: BRoute = {
         const approx = await gmaps.approximateCoordinates(fullAddress.lat, fullAddress.lon)
 
         const { verified } = await dal.get<Partial<User>>(`/items/users/${request.user!.id}?fields[]=verified`)
-
         const property: Property = {
             ...request.body as Property,
             country: fullAddress.country,
@@ -144,7 +143,8 @@ const route: BRoute = {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             verified: false,
-            private: !verified
+            private: !verified,
+            availebleDates: request.body.availebleDates || [],
         }
         property.images = ""
 
@@ -172,6 +172,7 @@ const route: BRoute = {
                 const property = await findProperty(propertyId, request.user)
                 if (!property) return response.status(404).send({ error: "Not found" })
                 const { body } = request as { body: Partial<Property> }
+                console.log('body', body)
                 const forbiddenKeys: (keyof Property)[] = [
                     "id", "owner", "verified", "lat", "lon", "approxLat", "approxLon", "createdAt", "updatedAt",
                     "city", "country", "region"
@@ -214,7 +215,7 @@ const route: BRoute = {
                 }
 
                 await redis.remove(`marker:${propertyId}`)
-
+                console.log('nproperty', nproperty)
                 const updated = await dal.update<Property>(`/items/properties/${propertyId}`, nproperty)
                 response.status(200).send(updated)
             }, [auth]],

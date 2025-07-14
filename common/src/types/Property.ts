@@ -37,6 +37,12 @@ export type Property = PublicProperty & {
     createdAt: string,
     updatedAt: string,
     createdDate: string,
+    availebleDates: AvailebleDates[],
 }
 
 export default Property
+
+type AvailebleDates = {
+    id: string,
+    value: string[]
+}

@@ -21,6 +21,8 @@ export type EmailParams = {
     from?: EmailRecipient,
     cc?: EmailRecipient[],
     bcc?: EmailRecipient[]
+     template_id?: string,
+  dynamic_template_data?: Record<string, any>
 }
 
 // Sendgrid has 100emails/day free

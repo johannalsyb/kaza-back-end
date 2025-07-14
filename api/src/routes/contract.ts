@@ -254,55 +254,27 @@ const route: BRoute = {
       if (!recipients.length) {
         return res.status(404).send({ error: 'No valid recipients found (host or guest)' });
       }
-      console.log('Recipient:', recipients);
 
-
-      // 4. Load and fill the HTML template
-      // 4. Load email template from Directus translations
-const transRes = await fetchRequest(
-  `${DIRECTUS_URL}/items/translations?filter=${encodeURIComponent(JSON.stringify({
-    _or: [
-      { id: "email_houseswap_contract" }
-    ]
-  }))}`,
-  {
-    headers: { Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}` },
-  }
-);
-
-const transJson = await transRes.json();
-const translations = transJson?.data || [];
-
-const templateItem = translations.find((t: { id: any; }) => t.id === "email_houseswap_contract");
-
-
-if (!templateItem) {
-  return res.status(500).send({ error: 'Email template or subject not found in Directus' });
-}
-
-let rawHtml = templateItem.english;
-if (rawHtml.startsWith("file://")) {
-  rawHtml = await fs.readFile(rawHtml.replace("file:/", "."), { encoding: "utf8" });
-}
-
+      // 4. Setup dynamic fields
       const verifyUrl = `${FRONTEND_VERIFY_URL}?token=${contract.verification_token}`;
       const expiry = new Date(contract.verification_expires_at).toLocaleDateString();
 
-      // 5. Send email to each recipient
-      const promises = recipients.map((recipient:any) => {
-        const personalizedHtml = rawHtml
-          .replace(/%name%/g, recipient.name)
-          .replace(/%surname%/g, recipient.surname)
-          .replace(/%url%/g, verifyUrl)
-          .replace(/%expires_at%/g, expiry);
-
-        return sendEmail({
+      // 5. Send using dynamic SendGrid template
+      const promises = recipients.map((recipient: any) =>
+        sendEmail({
           to: [{ email: recipient.email, name: `${recipient.name} ${recipient.surname}` }],
           subject: 'Share Contract - KazaSwap',
-          content: personalizedHtml,
           contentType: 'text/html',
-        });
-      });
+          from: { email: "community@kazaswap.co", name: "Kaza Swap" },
+          template_id: "d-a6102a6f8a1e4884b3c315f305bc72d2", 
+          dynamic_template_data: {
+            name: recipient.name,
+            surname: recipient.surname,
+            url: verifyUrl,
+            expires_at: expiry,
+          },
+        } as any) 
+      );
 
       await Promise.all(promises);
 

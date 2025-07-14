@@ -61,46 +61,46 @@ export namespace Gmaps {
 
     export type PlaceDetail = {
         address_components: {
-            long_name : string,
-            short_name : string,
-            types : string[]
+            long_name: string,
+            short_name: string,
+            types: string[]
         }[],
-        formatted_address : string,
-        geometry : {
-            location : {
-                lat : number,
-                lng : number
+        formatted_address: string,
+        geometry: {
+            location: {
+                lat: number,
+                lng: number
             },
             location_type?: string,
-            viewport : {
-                northeast : {
-                    lat : number,
-                    lng : number
+            viewport: {
+                northeast: {
+                    lat: number,
+                    lng: number
                 },
-                southwest : {
-                    lat : number,
-                    lng : number
+                southwest: {
+                    lat: number,
+                    lng: number
                 }
             }
         },
-        place_id : string,
-        plus_code : {
-            compound_code : string,
-            global_code : string
+        place_id: string,
+        plus_code: {
+            compound_code: string,
+            global_code: string
         },
-        types : string[]
+        types: string[]
     }
 
     export type PlaceDetailResponse = {
         result: PlaceDetail,
         error_message?: string,
-        status : string
+        status: string
     }
 
     export type GeocodeResponse = {
         results: PlaceDetail[],
         error_message?: string,
-        status : string
+        status: string
     }
 
     export const addressTypes = {
@@ -146,7 +146,7 @@ export namespace Gmaps {
 
     export type SearchResponse = {
         html_attributions: [],
-        results:{
+        results: {
             formatted_address: string,
             geometry:
             {
@@ -172,29 +172,29 @@ export namespace Gmaps {
     }
 }
 
-function getDistanceFromLatLonInKm(lat1:number,lon1:number,lat2:number,lon2:number) {
-    var R = 6371; // Radius of the earth in km
-    var dLat = deg2rad(lat2-lat1);  // deg2rad below
-    var dLon = deg2rad(lon2-lon1);
-    var a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-    var d = R * c; // Distance in km
-    return d;
+function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+    var R = 6371 // Radius of the earth in km
+    var dLat = deg2rad(lat2 - lat1)  // deg2rad below
+    var dLon = deg2rad(lon2 - lon1)
+    var a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2)
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    var d = R * c // Distance in km
+    return d
 }
 
-function deg2rad(deg:number) {
-    return deg * (Math.PI/180)
+function deg2rad(deg: number) {
+    return deg * (Math.PI / 180)
 }
 
-export const approximateCoordinates = (lat:number, lon:number) => {
+export const approximateCoordinates = (lat: number, lon: number) => {
     const delta = 0.005 // 550m radius
     return {
-        lat: lat-Math.random()*delta,
-        lon: lon-Math.random()*delta
-    }   
+        lat: lat - Math.random() * delta,
+        lon: lon - Math.random() * delta
+    }
 }
 
 export type Geocoding = {
@@ -223,7 +223,7 @@ export type Geocoding = {
 }
 
 /* DEPRECATED: Only works for certain countries */
-export const validateAddress = async (address: string):Promise<Geocoding | null> => {
+export const validateAddress = async (address: string): Promise<Geocoding | null> => {
     const ret = await request(`https://addressvalidation.googleapis.com/v1:validateAddress?key=${GMAPS_APIKEY}`, {
         method: "POST",
         body: JSON.stringify({
@@ -236,7 +236,7 @@ export const validateAddress = async (address: string):Promise<Geocoding | null>
         },
     })
 
-    const {result} = await ret.json() as Gmaps.AddressVerificationResponse
+    const { result } = await ret.json() as Gmaps.AddressVerificationResponse
     return {
         country: result?.address?.postalAddress?.regionCode,
         region: result?.address?.postalAddress?.administrativeArea,
@@ -258,12 +258,12 @@ export const validateAddress = async (address: string):Promise<Geocoding | null>
                     lon: result?.geocode?.bounds.low.longitude
                 }
             }
-        } 
+        }
     }
 }
 
 /* Note: GPS Coordinates are not accurate enough, so we use this for the zone */
-export const geocodeZone = async (address: string):Promise<Geocoding | null> => {
+export const geocodeZone = async (address: string): Promise<Geocoding | null> => {
     const ret = await request(`https://maps.googleapis.com/maps/api/geocode/json?key=${GMAPS_APIKEY}&address=${encodeURIComponent(address)}`, {
         // method: "POST",
         // body: JSON.stringify({
@@ -277,11 +277,11 @@ export const geocodeZone = async (address: string):Promise<Geocoding | null> => 
     })
 
     const json = await ret.json() as Gmaps.GeocodeResponse
-    if(json.status !== "OK") throw new Error(`Failed to geocode address (${json.status}${json.error_message ? `: ${json.error_message}` : ""})`)
+    if (json.status !== "OK") throw new Error(`Failed to geocode address (${json.status}${json.error_message ? `: ${json.error_message}` : ""})`)
 
     try {
         const result = json.results[0]
-        if(!result) return null
+        if (!result) return null
 
         const width = getDistanceFromLatLonInKm(
             result.geometry.viewport.northeast.lat,
@@ -298,7 +298,7 @@ export const geocodeZone = async (address: string):Promise<Geocoding | null> => 
         const sizeKm = width * height
 
         const country = result.address_components?.find(c => c.types.includes("country"))?.long_name
-        if(!country) return null
+        if (!country) return null
         const region = result.address_components?.filter(c => c.types.includes("administrative_area")).reverse()[0]?.long_name
         const city = result.address_components?.filter(c => c.types.includes("locality")).reverse()[0]?.long_name
         return {
@@ -323,15 +323,15 @@ export const geocodeZone = async (address: string):Promise<Geocoding | null> => 
                     }
                 }
 
-            } 
+            }
         }
-    } catch(e) {
+    } catch (e) {
         return null
     }
 }
 
 /* This is the best method so far: find the place ID from the address then find the place details from the place ID */
-export const searchAddress = async (address: string):Promise<Geocoding | null> => {
+export const searchAddress = async (address: string): Promise<Geocoding | null> => {
     // const ret = await request(`https://maps.googleapis.com/maps/api/place/textsearch/json?key=${GMAPS_APIKEY}&query=${encodeURIComponent(address)}`, {
     //     headers: {
     //         "Content-Type": "application/json"
@@ -339,23 +339,23 @@ export const searchAddress = async (address: string):Promise<Geocoding | null> =
     // })
     try {
 
-    // const json = await ret.json() as Gmaps.SearchResponse
-    // console.log(`https://maps.googleapis.com/maps/api/place/textsearch/json?key=${GMAPS_APIKEY}&query=${encodeURIComponent(address)}`, json)
+        // const json = await ret.json() as Gmaps.SearchResponse
+        // console.log(`https://maps.googleapis.com/maps/api/place/textsearch/json?key=${GMAPS_APIKEY}&query=${encodeURIComponent(address)}`, json)
         const json = await autocomplete(address)
         // console.log(json)
-    // c
-    // if(json.status !== "OK") throw new Error(`Failed to search address (${json.status}${json.error_message ? `: ${json.error_message}` : ""})`)
+        // c
+        // if(json.status !== "OK") throw new Error(`Failed to search address (${json.status}${json.error_message ? `: ${json.error_message}` : ""})`)
 
-        if(!json[0]) return null
+        if (!json[0]) return null
 
         const ret = await request(`https://maps.googleapis.com/maps/api/place/details/json?key=${GMAPS_APIKEY}&place_id=${json[0].place_id}`, {
             headers: {
                 "Content-Type": "application/json"
             },
         })
-    
+
         const json2 = await ret.json() as Gmaps.PlaceDetailResponse
-        if(json2.status !== "OK") throw new Error(`Failed to search address (${json2.status}${json2.error_message ? `: ${json2.error_message}` : ""})`)
+        if (json2.status !== "OK") throw new Error(`Failed to search address (${json2.status}${json2.error_message ? `: ${json2.error_message}` : ""})`)
         const result = json2.result
 
         const width = getDistanceFromLatLonInKm(
@@ -373,7 +373,7 @@ export const searchAddress = async (address: string):Promise<Geocoding | null> =
         const sizeKm = width * height
 
         const country = result.address_components?.find(c => c.types.includes("country"))?.long_name
-        if(!country) return null
+        if (!country) return null
         const region = result.address_components?.filter(c => c.types.includes("administrative_area")).reverse()[0]?.long_name
         const city = result.address_components?.filter(c => c.types.includes("locality")).reverse()[0]?.long_name
         return {
@@ -398,36 +398,38 @@ export const searchAddress = async (address: string):Promise<Geocoding | null> =
                     }
                 }
 
-            } 
+            }
         }
-    } catch(e) {
+    } catch (e) {
         return null
     }
 }
 
+const generateLinkGmaps = (type: string) => `https://maps.googleapis.com/maps/api/${type}/json?key=${GMAPS_APIKEY}`
+
 
 export const autocomplete = async (address: string) => {
-    const ret = await request(`https://maps.googleapis.com/maps/api/place/autocomplete/json?key=${GMAPS_APIKEY}&input=${encodeURIComponent(address)}`, {
+    const ret = await request(`${generateLinkGmaps('place/autocomplete')}&input=${encodeURIComponent(address)}`, {
         headers: {
             "Content-Type": "application/json"
         },
     })
     const json = await ret.json() as Gmaps.AutocompleteResponse
 
-    if(json.status !== "OK") throw new Error(`Failed to autocomplete address (${json.status}${json.error_message ? `: ${json.error_message}` : ""})`)
+    if (json.status !== "OK") throw new Error(`Failed to autocomplete address (${json.status}${json.error_message ? `: ${json.error_message}` : ""})`)
 
     return json.predictions
 }
 
-export const latLonToAddress = async (lat: number, lon:number):Promise<Geocoding[]> => {
-    const ret = await request(`https://maps.googleapis.com/maps/api/geocode/json?key=${GMAPS_APIKEY}&latlng=${lat},${lon}`, {
+export const latLonToAddress = async (lat: number, lon: number): Promise<Geocoding[]> => {
+    const ret = await request(`${generateLinkGmaps('geocode')}/&latlng=${lat},${lon}`, {
         headers: {
             "Content-Type": "application/json"
         },
     })
     const json = await ret.json() as Gmaps.GeocodeResponse
-    if(json.status !== "OK") throw new Error(`Failed to reverse geocode coordinates (${json.status}${json.error_message ? `: ${json.error_message}` : ""})`)
-    
+    if (json.status !== "OK") throw new Error(`Failed to reverse geocode coordinates (${json.status}${json.error_message ? `: ${json.error_message}` : ""})`)
+
     return json.results.map(result => {
         const width = getDistanceFromLatLonInKm(
             result.geometry.viewport.northeast.lat,
@@ -444,10 +446,10 @@ export const latLonToAddress = async (lat: number, lon:number):Promise<Geocoding
         const sizeKm = width * height
 
         const country = result.address_components?.find(c => c.types.includes("country"))?.long_name
-        if(!country) return null
+        if (!country) return null
         const region = result.address_components?.filter(c => c.types.includes("administrative_area")).reverse()[0]?.long_name
         const city = result.address_components?.filter(c => c.types.includes("locality")).reverse()[0]?.long_name
-        const geo:Geocoding = {
+        const geo: Geocoding = {
             country,
             region,
             city,
@@ -469,7 +471,7 @@ export const latLonToAddress = async (lat: number, lon:number):Promise<Geocoding
                     }
                 }
 
-            } ,
+            },
             types: result.types
         }
         return geo

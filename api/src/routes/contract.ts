@@ -1,6 +1,6 @@
 import { BRoute } from '../types';
 import { request as fetchRequest } from '../utils';
-import { DIRECTUS_URL, DIRECTUS_AUTH_BEARER,BASE_URL } from '../config';
+import { DIRECTUS_URL, DIRECTUS_AUTH_BEARER, BASE_URL } from '../config';
 import crypto from 'crypto';
 import sendEmail from '../services/email';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';;
@@ -93,14 +93,15 @@ const route: BRoute = {
               });
 
               await finalizeContract(contract_id);
+              await sendPDFToEarlierUser(contract_id);
             }
 
             return res.status(201).send({ success: true, details: saved.data, contract_id });
           }
 
           if (!start_date || !end_date || !['host', 'guest'].includes(role)) {
-  return res.status(400).send({ error: 'Start and end dates are required for the initiator (host or guest)' });
-}
+            return res.status(400).send({ error: 'Start and end dates are required for the initiator (host or guest)' });
+          }
 
           const token = crypto.randomBytes(32).toString('hex');
           const expiresAt = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString();
@@ -158,357 +159,318 @@ const route: BRoute = {
       },
     },
     "": {
-  get: async (req, res) => {
-    try {
-      const token = req.query.token as string;
-      if (!token) return res.status(400).send({ error: 'Missing verification token' });
+      get: async (req, res) => {
+        try {
+          const token = req.query.token as string;
+          if (!token) return res.status(400).send({ error: 'Missing verification token' });
 
-      const contractRes = await fetchRequest(`${DIRECTUS_URL}/items/contract?filter[verification_token][_eq]=${token}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}`,
-        },
-      });
+          const contractRes = await fetchRequest(`${DIRECTUS_URL}/items/contract?filter[verification_token][_eq]=${token}`, {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}`,
+            },
+          });
 
-      const contractData = await contractRes.json();
-      const contract = contractData?.data?.[0];
-      if (!contract) return res.status(404).send({ error: 'Invalid or expired token' });
+          const contractData = await contractRes.json();
+          const contract = contractData?.data?.[0];
+          if (!contract) return res.status(404).send({ error: 'Invalid or expired token' });
 
-      // ✅ Check expiration
-      const now = new Date();
-      const expiresAt = new Date(contract.verification_expires_at);
-      if (expiresAt < now) {
-        return res.status(403).send({ error: 'Verification token has expired' });
-      }
+          // ✅ Check expiration
+          const now = new Date();
+          const expiresAt = new Date(contract.verification_expires_at);
+          if (expiresAt < now) {
+            return res.status(403).send({ error: 'Verification token has expired' });
+          }
 
-      const detailsRes = await fetchRequest(`${DIRECTUS_URL}/items/contract_details?filter[contract_id][_eq]=${contract.id}`, {
-        headers: {
-          Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}`,
-        },
-      });
+          const detailsRes = await fetchRequest(`${DIRECTUS_URL}/items/contract_details?filter[contract_id][_eq]=${contract.id}`, {
+            headers: {
+              Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}`,
+            },
+          });
 
-      const detailsData = await detailsRes.json();
-      const host = detailsData.data.find((d: any) => d.role === 'host') || null;
-      const guest = detailsData.data.find((d: any) => d.role === 'guest') || null;
+          const detailsData = await detailsRes.json();
+          const host = detailsData.data.find((d: any) => d.role === 'host') || null;
+          const guest = detailsData.data.find((d: any) => d.role === 'guest') || null;
 
-      return res.status(200).send({
-        contract_id: contract.id,
-        start_date: contract.start_date,
-        end_date: contract.end_date,
-        verification_expires_at: contract.verification_expires_at,
-        is_complete: contract.is_complete,
-        match_score: contract.match_score,
-        host,
-        guest,
-      });
-    } catch (err) {
-      console.error('❌ Error fetching contract:', err);
-      return res.status(500).send({ error: 'Internal server error' });
-    }
-  }
-},
-
-'send-email': {
-  post: async (req, res) => {
-    try {
-      const { contract_id } = req.body;
-
-      if (!contract_id) {
-        return res.status(400).send({ error: 'Missing contract_id' });
-      }
-
-      // Capitalize helper
-      const capitalize = (str:any) =>
-        str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : '';
-
-      // 1. Fetch contract
-      const contractRes = await fetchRequest(`${DIRECTUS_URL}/items/contract/${contract_id}`, {
-        headers: { Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}` },
-      });
-      const contractJson = await contractRes.json();
-      const contract = contractJson?.data;
-
-      if (!contract || !contract.verification_token) {
-        return res.status(404).send({ error: 'Contract not found or invalid' });
-      }
-
-      // 2. Fetch host & guest details
-      const detailsRes = await fetchRequest(
-        `${DIRECTUS_URL}/items/contract_details?filter[contract_id][_eq]=${contract_id}`,
-        {
-          headers: { Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}` },
+          return res.status(200).send({
+            contract_id: contract.id,
+            start_date: contract.start_date,
+            end_date: contract.end_date,
+            verification_expires_at: contract.verification_expires_at,
+            is_complete: contract.is_complete,
+            match_score: contract.match_score,
+            host,
+            guest,
+          });
+        } catch (err) {
+          console.error('❌ Error fetching contract:', err);
+          return res.status(500).send({ error: 'Internal server error' });
         }
-      );
-      const detailsJson = await detailsRes.json();
-      const allDetails = detailsJson?.data || [];
-
-      // 3. Prepare recipients
-      const recipients = allDetails
-        .filter((d:any) => d.email && (d.name || d.surname))
-        .map((d:any) => ({
-          email: d.email,
-          name: capitalize(d.name),
-          surname: capitalize(d.surname),
-        }));
-
-      if (!recipients.length) {
-        return res.status(404).send({ error: 'No valid recipients found (host or guest)' });
       }
-      console.log('Recipient:', recipients);
+    },
+
+    'send-email': {
+      post: async (req, res) => {
+        try {
+          const { contract_id } = req.body;
+
+          if (!contract_id) {
+            return res.status(400).send({ error: 'Missing contract_id' });
+          }
+
+          // Capitalize helper
+          const capitalize = (str: any) =>
+            str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : '';
+
+          // 1. Fetch contract
+          const contractRes = await fetchRequest(`${DIRECTUS_URL}/items/contract/${contract_id}`, {
+            headers: { Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}` },
+          });
+          const contractJson = await contractRes.json();
+          const contract = contractJson?.data;
+
+          if (!contract || !contract.verification_token) {
+            return res.status(404).send({ error: 'Contract not found or invalid' });
+          }
+
+          // 2. Fetch host & guest details
+          const detailsRes = await fetchRequest(
+            `${DIRECTUS_URL}/items/contract_details?filter[contract_id][_eq]=${contract_id}`,
+            {
+              headers: { Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}` },
+            }
+          );
+          const detailsJson = await detailsRes.json();
+          const allDetails = detailsJson?.data || [];
+
+          // 3. Prepare recipients
+          const recipients = allDetails
+            .filter((d: any) => d.email && (d.name || d.surname))
+            .map((d: any) => ({
+              email: d.email,
+              name: capitalize(d.name),
+              surname: capitalize(d.surname),
+            }));
+
+          if (!recipients.length) {
+            return res.status(404).send({ error: 'No valid recipients found (host or guest)' });
+          }
+
+          // 4. Setup dynamic fields
+          const verifyUrl = `${FRONTEND_VERIFY_URL}?token=${contract.verification_token}`;
+          const expiry = new Date(contract.verification_expires_at).toLocaleDateString();
+
+          // 5. Send using dynamic SendGrid template
+          const promises = recipients.map((recipient: any) =>
+            sendEmail({
+              to: [{ email: recipient.email, name: `${recipient.name} ${recipient.surname}` }],
+              subject: 'Share Contract - KazaSwap',
+              contentType: 'text/html',
+              from: { email: "community@kazaswap.co", name: "Kaza Swap" },
+              template_id: "d-a6102a6f8a1e4884b3c315f305bc72d2",
+              dynamic_template_data: {
+                name: recipient.name,
+                surname: recipient.surname,
+                url: verifyUrl,
+                expires_at: expiry,
+              },
+            } as any)
+          );
+
+          await Promise.all(promises);
+
+          return res.status(200).send({ message: 'Verification emails sent successfully.' });
+        } catch (error) {
+          console.error('❌ Email sending error:', error);
+          return res.status(500).send({ error: 'Failed to send verification emails.' });
+        }
+      },
+    },
 
 
-      // 4. Load and fill the HTML template
-      // 4. Load email template from Directus translations
-const transRes = await fetchRequest(
-  `${DIRECTUS_URL}/items/translations?filter=${encodeURIComponent(JSON.stringify({
-    _or: [
-      { id: "email_houseswap_contract" }
-    ]
-  }))}`,
-  {
-    headers: { Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}` },
-  }
-);
-
-const transJson = await transRes.json();
-const translations = transJson?.data || [];
-
-const templateItem = translations.find((t: { id: any; }) => t.id === "email_houseswap_contract");
 
 
-if (!templateItem) {
-  return res.status(500).send({ error: 'Email template or subject not found in Directus' });
-}
+    'generate-pdf': {
+      post: async (req, res) => {
+        try {
+          const { contract_id } = req.body;
 
-let rawHtml = templateItem.english;
-if (rawHtml.startsWith("file://")) {
-  rawHtml = await fs.readFile(rawHtml.replace("file:/", "."), { encoding: "utf8" });
-}
+          if (!contract_id) {
+            return res.status(400).send({ error: 'Missing contract_id' });
+          }
 
-      const verifyUrl = `${FRONTEND_VERIFY_URL}?token=${contract.verification_token}`;
-      const expiry = new Date(contract.verification_expires_at).toLocaleDateString();
+          // Fetch contract
+          const contractRes = await fetchRequest(`${DIRECTUS_URL}/items/contract/${contract_id}`, {
+            headers: { Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}` },
+          });
+          const contractJson = await contractRes.json();
+          const contract = contractJson?.data;
+          if (!contract) {
+            return res.status(404).send({ error: 'Contract not found' });
+          }
 
-      // 5. Send email to each recipient
-      const promises = recipients.map((recipient:any) => {
-        const personalizedHtml = rawHtml
-          .replace(/%name%/g, recipient.name)
-          .replace(/%surname%/g, recipient.surname)
-          .replace(/%url%/g, verifyUrl)
-          .replace(/%expires_at%/g, expiry);
+          // Fetch host & guest
+          const detailsRes = await fetchRequest(`${DIRECTUS_URL}/items/contract_details?filter[contract_id][_eq]=${contract_id}`, {
+            headers: { Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}` },
+          });
+          const detailsJson = await detailsRes.json();
+          const host = detailsJson?.data?.find((d: any) => d.role === 'host');
+          const guest = detailsJson?.data?.find((d: any) => d.role === 'guest');
+          if (!host || !guest) {
+            return res.status(404).send({ error: 'Host or Guest not found' });
+          }
 
-        return sendEmail({
-          to: [{ email: recipient.email, name: `${recipient.name} ${recipient.surname}` }],
-          subject: 'Share Contract - KazaSwap',
-          content: personalizedHtml,
-          contentType: 'text/html',
-        });
-      });
+          // Create PDF
+          const pdfDoc = await PDFDocument.create();
+          const page = pdfDoc.addPage();
+          const { width, height } = page.getSize();
+          const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+          const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-      await Promise.all(promises);
+          // Embed logo
+          const logoPath = path.resolve(__dirname, '../../assets/KazaSwap_horizontal logo_black and yellow.png');
+          const logoBytes = await fs2.readFile(logoPath);
+          const logoImage = await pdfDoc.embedPng(logoBytes);
 
-      return res.status(200).send({ message: 'Verification emails sent successfully.' });
-    } catch (error) {
-      console.error('❌ Email sending error:', error);
-      return res.status(500).send({ error: 'Failed to send verification emails.' });
-    }
-  },
-},
+          const logoWidth = 110.74;
+          const logoHeight = 43.73;
+          const topMargin = 100;
+
+          page.drawImage(logoImage, {
+            x: (width - logoWidth) / 2,
+            y: height - topMargin,
+            width: logoWidth,
+            height: logoHeight,
+          });
+
+          // Title below logo
+          const title = 'Generated Contract';
+          const titleSize = 18;
+          const titleWidth = boldFont.widthOfTextAtSize(title, titleSize);
+
+          const titleY = height - topMargin - logoHeight - 10;
+          page.drawText(title, {
+            x: (width - titleWidth) / 2,
+            y: titleY,
+            size: titleSize,
+            font: boldFont,
+            color: rgb(0, 0, 0),
+          });
+          const formatDate = (date: string | number | Date): string => {
+            if (!date) return 'Invalid Date';
+            const parsedDate = new Date(date);
+            if (isNaN(parsedDate.getTime())) return 'Invalid Date';
+
+            return parsedDate.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: '2-digit',
+            });
+          };
 
 
+          const formattedDate = formatDate(new Date());
+          const formattedStartDate = formatDate(contract.start_date);
+          const formattedEndDate = formatDate(contract.end_date);
 
+          // Body content with left padding
+          const lines = [
+            ``,
+            `This contract is made between <b>${host.name} ${host.surname}</b> (referred to as the Host) and`,
+            `<b>${guest.name} ${guest.surname}</b> (referred to as the Guest).`,
+            `The swap will take place from <b>${formattedStartDate}</b> to <b>${formattedEndDate}</b>.`,
+            ``,
+            `The Host agrees to provide access to their home for the duration of this period.`,
+            `Any changes to the agreed dates must be communicated by the Host to the`,
+            `Guest in advance, so appropriate arrangements can be made.`,
+            `The Host confirms that the home is described as <b>${host.cleanliness || 'N/A'}</b>.`,
+            ``,
+            `The Guest is expected to maintain the cleanliness of the home and leave it in`,
+            `the same condition it was found.`,
+            `The Guest expects the place to be <b>${host.cleanliness} </b> upon arrival and agrees to`,
+            `<b>${guest.expectations?.trash ? 'take out the trash' : 'no trash duties'}</b> before departure. The Guest will <b>${guest.rules?.petsAllowed ? '' : 'not '}</b> bring pets`,
+            `and is considered smoking <b>${guest.rules?.smokingAllowed ? 'allowed' : 'not allowed'}</b>.`,
+            ``,
+            `Both parties agree to:`,
+            `• Share photos of their homes to show the current condition.`,
+            `• Arrange a call before the swap to ensure expectations are aligned.`,
+            ``,
+            `Date of Agreement: <b>${formattedDate}</b>`,
+          ];
 
-   'generate-pdf': {
-  post: async (req, res) => {
-    try {
-      const { contract_id } = req.body;
+          const leftPadding = 82; // 1 inch padding (72 points = 1 inch)
+          let y = titleY - 30;
+          // Function to draw text with bold formatting
+          const drawFormattedText = (text: string, x: number, y: number) => {
+            // Split the text by bold tags
+            const parts = text.split(/(<b>|<\/b>)/);
+            let currentX = x;
+            let isBold = false;
 
-      if (!contract_id) {
-        return res.status(400).send({ error: 'Missing contract_id' });
+            for (const part of parts) {
+              if (part === '<b>') {
+                isBold = true;
+                continue;
+              }
+              if (part === '</b>') {
+                isBold = false;
+                continue;
+              }
+
+              if (part.trim().length > 0) {
+                page.drawText(part, {
+                  x: currentX,
+                  y,
+                  size: 12,
+                  font: isBold ? boldFont : font,
+                  color: rgb(140 / 255, 140 / 255, 140 / 255),
+                });
+                // Move the x position based on the text width
+                currentX += (isBold ? boldFont : font).widthOfTextAtSize(part, 12);
+              }
+            }
+          };
+
+          // Draw each line with proper formatting
+          for (const line of lines) {
+            if (line.trim() === '') {
+              y -= 20; // Empty line spacing
+              continue;
+            }
+
+            if (line.startsWith('•')) {
+              // Handle bullet points
+              page.drawText('•', {
+                x: leftPadding,
+                y,
+                size: 12,
+                font,
+                color: rgb(140 / 255, 140 / 255, 140 / 255),
+              });
+              drawFormattedText(line.slice(1), leftPadding + 10, y);
+            } else {
+              // Regular line
+              drawFormattedText(line, leftPadding, y);
+            }
+
+            y -= 20; // Move to next line
+          }
+
+          const pdfBytes = await pdfDoc.save();
+          const base64 = Buffer.from(pdfBytes).toString('base64');
+
+          return res.status(200).send({
+            message: 'PDF generated successfully.',
+            pdf: base64,
+            filename: `${host.name}-contract-houseSwap.pdf`,
+            contentType: 'application/pdf',
+          });
+        } catch (err) {
+          console.error('❌ PDF Generation Error:', err);
+          return res.status(500).send({ error: 'Internal Server Error' });
+        }
       }
-
-      // Fetch contract
-      const contractRes = await fetchRequest(`${DIRECTUS_URL}/items/contract/${contract_id}`, {
-        headers: { Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}` },
-      });
-      const contractJson = await contractRes.json();
-      const contract = contractJson?.data;
-      if (!contract) {
-        return res.status(404).send({ error: 'Contract not found' });
-      }
-
-      // Fetch host & guest
-      const detailsRes = await fetchRequest(`${DIRECTUS_URL}/items/contract_details?filter[contract_id][_eq]=${contract_id}`, {
-        headers: { Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}` },
-      });
-      const detailsJson = await detailsRes.json();
-      const host = detailsJson?.data?.find((d: any) => d.role === 'host');
-      const guest = detailsJson?.data?.find((d: any) => d.role === 'guest');
-      if (!host || !guest) {
-        return res.status(404).send({ error: 'Host or Guest not found' });
-      }
-
-      // Create PDF
-      const pdfDoc = await PDFDocument.create();
-      const page = pdfDoc.addPage();
-      const { width, height } = page.getSize();
-      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-      const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-
-      // Embed logo
-      const logoPath = path.resolve(__dirname, '../../assets/KazaSwap_horizontal logo_black and yellow.png');
-      const logoBytes = await fs2.readFile(logoPath);
-      const logoImage = await pdfDoc.embedPng(logoBytes);
-
-      const logoWidth = 110.74;
-      const logoHeight = 43.73;
-      const topMargin = 100;
-
-      page.drawImage(logoImage, {
-        x: (width - logoWidth) / 2,
-        y: height - topMargin,
-        width: logoWidth,
-        height: logoHeight,
-      });
-
-      // Title below logo
-      const title = 'Generated Contract';
-      const titleSize = 18;
-      const titleWidth = boldFont.widthOfTextAtSize(title, titleSize);
-
-      const titleY = height - topMargin - logoHeight - 10;
-      page.drawText(title, {
-        x: (width - titleWidth) / 2,
-        y: titleY,
-        size: titleSize,
-        font: boldFont,
-        color: rgb(0, 0, 0),
-      });
-     const formatDate = (date: string | number | Date): string => {
-  if (!date) return 'Invalid Date';
-  const parsedDate = new Date(date);
-  if (isNaN(parsedDate.getTime())) return 'Invalid Date';
-
-  return parsedDate.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-  });
-};
-
-
-const formattedDate = formatDate(new Date());
-const formattedStartDate = formatDate(contract.start_date);
-const formattedEndDate = formatDate(contract.end_date);
-
-      // Body content with left padding
-      const lines = [
-        ``,
-        `This contract is made between <b>${host.name} ${host.surname}</b> (referred to as the Host) and`,
-        `<b>${guest.name} ${guest.surname}</b> (referred to as the Guest).`,
-        `The swap will take place from <b>${formattedStartDate}</b> to <b>${formattedEndDate}</b>.`,
-        ``,
-        `The Host agrees to provide access to their home for the duration of this period.`,
-        `Any changes to the agreed dates must be communicated by the Host to the`,
-        `Guest in advance, so appropriate arrangements can be made.`,
-        `The Host confirms that the home is described as <b>${host.cleanliness || 'N/A'}</b>.`,
-        ``,
-        `The Guest is expected to maintain the cleanliness of the home and leave it in`,
-        `the same condition it was found.`,
-        `The Guest expects the place to be <b>${host.cleanliness} </b> upon arrival and agrees to`,
-        `<b>${guest.expectations?.trash ? 'take out the trash' : 'no trash duties'}</b> before departure. The Guest will <b>${guest.rules?.petsAllowed ? '' : 'not '}</b> bring pets`,
-        `and is considered smoking <b>${guest.rules?.smokingAllowed ? 'allowed' : 'not allowed'}</b>.`,
-        ``,
-        `Both parties agree to:`,
-        `• Share photos of their homes to show the current condition.`,
-        `• Arrange a call before the swap to ensure expectations are aligned.`,
-        ``,
-        `Date of Agreement: <b>${formattedDate}</b>`,
-      ];
-
-      const leftPadding = 82; // 1 inch padding (72 points = 1 inch)
-      let y = titleY - 30;
-      
-      // for (const line of lines) {
-      //   page.drawText(line, {
-      //     x: leftPadding, // Apply consistent left padding
-      //     y,
-      //     size: 12,
-      //     font,
-      //     color: rgb(140 / 255, 140 / 255, 140 / 255), 
-      //   });
-      //   y -= 20; // Slightly reduced line spacing for better readability
-      // }
-// Function to draw text with bold formatting
-const drawFormattedText = (text: string, x: number, y: number) => {
-  // Split the text by bold tags
-  const parts = text.split(/(<b>|<\/b>)/);
-  let currentX = x;
-  let isBold = false;
-
-  for (const part of parts) {
-    if (part === '<b>') {
-      isBold = true;
-      continue;
     }
-    if (part === '</b>') {
-      isBold = false;
-      continue;
-    }
-    
-    if (part.trim().length > 0) {
-      page.drawText(part, {
-        x: currentX,
-        y,
-        size: 12,
-        font: isBold ? boldFont : font,
-        color: rgb(140 / 255, 140 / 255, 140 / 255),
-      });
-      // Move the x position based on the text width
-      currentX += (isBold ? boldFont : font).widthOfTextAtSize(part, 12);
-    }
-  }
-};
-
-// Draw each line with proper formatting
-for (const line of lines) {
-  if (line.trim() === '') {
-    y -= 20; // Empty line spacing
-    continue;
-  }
-
-  if (line.startsWith('•')) {
-    // Handle bullet points
-    page.drawText('•', {
-      x: leftPadding,
-      y,
-      size: 12,
-      font,
-      color: rgb(140 / 255, 140 / 255, 140 / 255),
-    });
-    drawFormattedText(line.slice(1), leftPadding + 10, y);
-  } else {
-    // Regular line
-    drawFormattedText(line, leftPadding, y);
-  }
-  
-  y -= 20; // Move to next line
-}
-
-      const pdfBytes = await pdfDoc.save();
-      const base64 = Buffer.from(pdfBytes).toString('base64');
-
-      return res.status(200).send({
-        message: 'PDF generated successfully.',
-        pdf: base64,
-        filename: `${host.name}-contract-houseSwap.pdf`,
-        contentType: 'application/pdf',
-      });
-    } catch (err) {
-      console.error('❌ PDF Generation Error:', err);
-      return res.status(500).send({ error: 'Internal Server Error' });
-    }
-  }
-}
   }
 };
 
@@ -552,3 +514,180 @@ async function finalizeContract(contract_id: string) {
     console.error('❌ Failed to finalize contract:', e);
   }
 }
+
+
+async function sendPDFToEarlierUser(contract_id: string) {
+  try {
+    const contractRes = await fetchRequest(`${DIRECTUS_URL}/items/contract/${contract_id}`, {
+      headers: { Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}` },
+    });
+    const contractJson = await contractRes.json();
+    const contract = contractJson?.data;
+
+    if (!contract) throw new Error("Contract not found");
+
+    const detailsRes = await fetchRequest(`${DIRECTUS_URL}/items/contract_details?filter[contract_id][_eq]=${contract_id}`, {
+      headers: { Authorization: `Bearer ${DIRECTUS_AUTH_BEARER}` },
+    });
+    const detailsJson = await detailsRes.json();
+    const host = detailsJson?.data?.find((d: any) => d.role === 'host');
+    const guest = detailsJson?.data?.find((d: any) => d.role === 'guest');
+
+    if (!host || !guest) throw new Error("Host or Guest not found");
+
+    const hostDate = new Date(host.date_created);
+    const guestDate = new Date(guest.date_created);
+    const earlierUser = hostDate < guestDate ? host : guest;
+    const earlierUserEmail = earlierUser.email;
+    const earlierUserName = earlierUser.name;
+
+    // Create PDF
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage();
+    const { width, height } = page.getSize();
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+    // Embed logo
+    const logoPath = path.resolve(__dirname, '../../assets/KazaSwap_horizontal logo_black and yellow.png');
+    const logoBytes = await fs2.readFile(logoPath);
+    const logoImage = await pdfDoc.embedPng(logoBytes);
+    const logoWidth = 110.74;
+    const logoHeight = 43.73;
+    const topMargin = 100;
+
+    page.drawImage(logoImage, {
+      x: (width - logoWidth) / 2,
+      y: height - topMargin,
+      width: logoWidth,
+      height: logoHeight,
+    });
+
+    const title = 'Generated Contract';
+    const titleSize = 18;
+    const titleWidth = boldFont.widthOfTextAtSize(title, titleSize);
+    const titleY = height - topMargin - logoHeight - 10;
+
+    page.drawText(title, {
+      x: (width - titleWidth) / 2,
+      y: titleY,
+      size: titleSize,
+      font: boldFont,
+      color: rgb(0, 0, 0),
+    });
+
+    const formatDate = (date: string | number | Date): string => {
+      if (!date) return 'Invalid Date';
+      const parsedDate = new Date(date);
+      if (isNaN(parsedDate.getTime())) return 'Invalid Date';
+      return parsedDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+      });
+    };
+
+    const formattedDate = formatDate(new Date());
+    const formattedStartDate = formatDate(contract.start_date);
+    const formattedEndDate = formatDate(contract.end_date);
+
+    const lines = [
+      ``,
+      `This contract is made between <b>${host.name} ${host.surname}</b> (referred to as the Host) and`,
+      `<b>${guest.name} ${guest.surname}</b> (referred to as the Guest).`,
+      `The swap will take place from <b>${formattedStartDate}</b> to <b>${formattedEndDate}</b>.`,
+      ``,
+      `The Host agrees to provide access to their home for the duration of this period.`,
+      `Any changes to the agreed dates must be communicated by the Host to the`,
+      `Guest in advance, so appropriate arrangements can be made.`,
+      `The Host confirms that the home is described as <b>${host.cleanliness || 'N/A'}</b>.`,
+      ``,
+      `The Guest is expected to maintain the cleanliness of the home and leave it in`,
+      `the same condition it was found.`,
+      `The Guest expects the place to be <b>${host.cleanliness} </b> upon arrival and agrees to`,
+      `<b>${guest.expectations?.trash ? 'take out the trash' : 'no trash duties'}</b> before departure. The Guest will <b>${guest.rules?.petsAllowed ? '' : 'not '}</b> bring pets`,
+      `and is considered smoking <b>${guest.rules?.smokingAllowed ? 'allowed' : 'not allowed'}</b>.`,
+      ``,
+      `Both parties agree to:`,
+      `• Share photos of their homes to show the current condition.`,
+      `• Arrange a call before the swap to ensure expectations are aligned.`,
+      ``,
+      `Date of Agreement: <b>${formattedDate}</b>`,
+    ];
+
+    const leftPadding = 82;
+    let y = titleY - 30;
+
+    const drawFormattedText = (text: string, x: number, y: number) => {
+      const parts = text.split(/(<b>|<\/b>)/);
+      let currentX = x;
+      let isBold = false;
+
+      for (const part of parts) {
+        if (part === '<b>') {
+          isBold = true;
+          continue;
+        }
+        if (part === '</b>') {
+          isBold = false;
+          continue;
+        }
+
+        if (part.trim().length > 0) {
+          page.drawText(part, {
+            x: currentX,
+            y,
+            size: 12,
+            font: isBold ? boldFont : font,
+            color: rgb(140 / 255, 140 / 255, 140 / 255),
+          });
+          currentX += (isBold ? boldFont : font).widthOfTextAtSize(part, 12);
+        }
+      }
+    };
+
+    for (const line of lines) {
+      if (line.trim() === '') {
+        y -= 20;
+        continue;
+      }
+      if (line.startsWith('•')) {
+        page.drawText('•', {
+          x: leftPadding,
+          y,
+          size: 12,
+          font,
+          color: rgb(140 / 255, 140 / 255, 140 / 255),
+        });
+        drawFormattedText(line.slice(1), leftPadding + 10, y);
+      } else {
+        drawFormattedText(line, leftPadding, y);
+      }
+      y -= 20;
+    }
+
+    const pdfBytes = await pdfDoc.save();
+    const base64 = Buffer.from(pdfBytes).toString('base64');
+
+    await sendEmail({
+      to: [{ email: earlierUserEmail, name: earlierUserName }],
+      from: { email: "community@kazaswap.co", name: "Kaza Swap" },
+      template_id: "d-1da334fbf2194bba9af7e92c98a2564b",
+      dynamic_template_data: {
+        name: earlierUser.name,
+        surname: earlierUser.surname,
+      },
+      attachments: [
+        {
+          content: base64,
+          filename: `${host.name}-contract-houseSwap.pdf`,
+          type: "application/pdf",
+          disposition: "attachment",
+        },
+      ],
+    } as any);
+  } catch (err) {
+    console.error("❌ Failed to send PDF email to earlier user:", err);
+  }
+}
+

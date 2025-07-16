@@ -16,7 +16,7 @@ export const AUTH_COOKIE = process.env.AUTH_COOKIE || "X-KAZA-AUTH"
 export const AUTH_SKIP = process.env.AUTH_SKIP === "true"
 export const AUTH_HEADER_REFRESH = process.env.AUTH_HEADER_REFRESH || "X-KAZA-REFRESH"
 
-export const CORS_ALLOWED_ORIGINS = process.env.CORS_ALLOWED_ORIGINS ? process.env.CORS_ALLOWED_ORIGINS.split(",") : ["*"]
+export const CORS_ALLOWED_ORIGINS = process.env.CORS_ALLOWED_ORIGINS ? process.env.CORS_ALLOWED_ORIGINS.split(",") : ["*", 'stage.app.kazaswap.co']
 export const CORS_ALLOWED_HEADERS = process.env.CORS_ALLOWED_HEADERS ? process.env.CORS_ALLOWED_HEADERS.split(",") : ["Content-Type", "Authorization", "customer", AUTH_HEADER, AUTH_COOKIE]
 export const CORS_ALLOWED_METHODS = process.env.CORS_ALLOWED_METHODS ? process.env.CORS_ALLOWED_METHODS.split(",") : ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
 

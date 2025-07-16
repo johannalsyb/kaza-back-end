@@ -21,6 +21,9 @@ jobs:
           key: ${{ secrets.PROD_KEY }}
           script: |
             cd /home/ubuntu/kaza-back-end
+            git fetch origin
+            git checkout staging-kaza-api-directus || git checkout -b staging-kaza-api-directus origin/staging-kaza-api-directus
+            git reset --hard origin/staging-kaza-api-directus
             docker-compose -f docker-compose.simple.yml down
-            docker system prune -f
+            docker system prune -f -a  #SAFE: no --volumes
             docker-compose -f docker-compose.simple.yml up -d --build

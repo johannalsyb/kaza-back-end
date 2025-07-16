@@ -21,8 +21,14 @@ export type EmailParams = {
     from?: EmailRecipient,
     cc?: EmailRecipient[],
     bcc?: EmailRecipient[]
-     template_id?: string,
-  dynamic_template_data?: Record<string, any>
+    template_id?: string,
+    dynamic_template_data?: Record<string, any>,
+    attachments?: {
+    content: string; // base64-encoded PDF
+    filename: string;
+    type: string; // MIME type, e.g. "application/pdf"
+    disposition?: "attachment" | "inline";
+  }[];
 }
 
 // Sendgrid has 100emails/day free

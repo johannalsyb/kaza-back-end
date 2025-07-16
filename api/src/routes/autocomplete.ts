@@ -65,6 +65,7 @@ const route:BRoute = {
                         }
                         return false
                     })
+                    // console.log('Gmaps', Gmaps);
                     completion.results = intersection.filter(i => !!i)
                 }
                 response.status(200).send(completion)

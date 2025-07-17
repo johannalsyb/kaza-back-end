@@ -73,8 +73,8 @@ export const IMAGE_USER_THUMBNAIL_WIDTH = parseInt(process.env.IMAGE_USER_THUMBN
 
 export const SMS_ENABLED = process.env.SMS_ENABLED ? process.env.SMS_ENABLED === "true" : false
 
-export const GMAPS_APIKEY = process.env.GMAPS_APIKEY || "AIzaSyAElByd9h_IdbJdG4GpBDwQo0lV2LNB6jA"
-export const GMAPS_WEB_APIKEY = process.env.GMAPS_WEB_APIKEY || "AIzaSyAElByd9h_IdbJdG4GpBDwQo0lV2LNB6jA"
+export const GMAPS_APIKEY = process.env.GMAPS_APIKEY || "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"
+export const GMAPS_WEB_APIKEY = process.env.GMAPS_WEB_APIKEY || "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"
 export const TINYURL_APIKEY = process.env.TINYURL_APIKEY
 export const SMSAPI_APIKEY = process.env.SMSAPI_APIKEY
 export const CLICKSEND_USERNAME = process.env.CLICKSEND_USERNAME

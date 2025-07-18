@@ -9,12 +9,14 @@ export const DAEMON_INCOMPLETE_PROFILES_CHECK_HRS = parseInt(process.env.DAEMON_
 export const DAEMON_INCOMPLETE_PROFILES_NOTIFICATION_HRS = parseInt(process.env.DAEMON_INCOMPLETE_PROFILES_NOTIFICATION_HRS || "24") || 24
 export const DAEMON_MATCHES_CHECK_HRS = parseInt(process.env.DAEMON_MATCHES_CHECK_HRS || "24") || 24
 
+export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "your-google-client-id.apps.googleusercontent.com"
+
 export const AUTH_HEADER = process.env.AUTH_HEADER || "X-KAZA-APIKEY"
 export const AUTH_COOKIE = process.env.AUTH_COOKIE || "X-KAZA-AUTH"
 export const AUTH_SKIP = process.env.AUTH_SKIP === "true"
 export const AUTH_HEADER_REFRESH = process.env.AUTH_HEADER_REFRESH || "X-KAZA-REFRESH"
 
-export const CORS_ALLOWED_ORIGINS = process.env.CORS_ALLOWED_ORIGINS ? process.env.CORS_ALLOWED_ORIGINS.split(",") : ["*"]
+export const CORS_ALLOWED_ORIGINS = process.env.CORS_ALLOWED_ORIGINS ? process.env.CORS_ALLOWED_ORIGINS.split(",") : ['*']
 export const CORS_ALLOWED_HEADERS = process.env.CORS_ALLOWED_HEADERS ? process.env.CORS_ALLOWED_HEADERS.split(",") : ["Content-Type", "Authorization", "customer", AUTH_HEADER, AUTH_COOKIE]
 export const CORS_ALLOWED_METHODS = process.env.CORS_ALLOWED_METHODS ? process.env.CORS_ALLOWED_METHODS.split(",") : ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
 

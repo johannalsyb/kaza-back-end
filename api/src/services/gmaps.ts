@@ -409,6 +409,7 @@ const generateLinkGmaps = (type: string) => `https://maps.googleapis.com/maps/ap
 
 
 export const autocomplete = async (address: string) => {
+    console.log('GMAPS_APIKEY', GMAPS_APIKEY)
     const ret = await request(`${generateLinkGmaps('place/autocomplete')}&input=${encodeURIComponent(address)}`, {
         headers: {
             "Content-Type": "application/json"

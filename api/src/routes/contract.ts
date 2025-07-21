@@ -462,7 +462,7 @@ const route: BRoute = {
           return res.status(200).send({
             message: 'PDF generated successfully.',
             pdf: base64,
-            filename: `${host.name}-contract-houseSwap.pdf`,
+            filename: `KazaSwap Agreement.pdf`,
             contentType: 'application/pdf',
           });
         } catch (err) {
@@ -680,7 +680,7 @@ async function sendPDFToEarlierUser(contract_id: string) {
       attachments: [
         {
           content: base64,
-          filename: `${host.name}-contract-houseSwap.pdf`,
+          filename: `KazaSwap Agreement.pdf`,
           type: "application/pdf",
           disposition: "attachment",
         },

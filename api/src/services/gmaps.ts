@@ -408,6 +408,7 @@ export const searchAddress = async (address: string): Promise<Geocoding | null> 
 const generateLinkGmaps = (type: string) => `https://maps.googleapis.com/maps/api/${type}/json?key=${GMAPS_APIKEY}`
 
 
+console.log('GMAPS_APIKEY', GMAPS_APIKEY)
 export const autocomplete = async (address: string) => {
     const ret = await request(`${generateLinkGmaps('place/autocomplete')}&input=${encodeURIComponent(address)}`, {
         headers: {

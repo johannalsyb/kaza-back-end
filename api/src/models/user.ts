@@ -49,7 +49,7 @@ export const email = {
             expiry: Date.now() + 1000 * 3600 * 24 * 31, // 31 days
             data: user.id
         })
-        const url = `https://web.kazaswap.co/verify?type=email&token=${temp.id}`
+        const url = `${host}/verify?type=email&token=${temp.id}`
 
         // Use SendGrid dynamic template instead of manual template replacement
         await sendEmail({

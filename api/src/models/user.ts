@@ -49,19 +49,16 @@ export const email = {
             expiry: Date.now() + 1000 * 3600 * 24 * 31, // 31 days
             data: user.id
         })
-        const url = `${host}/verify?type=email&token=${temp.id}`
+        const url = `https://web.kazaswap.co/verify?type=email&token=${temp.id}`
 
-        const translations = await dal.find<Translation>(`/items/translations?filter=${JSON.stringify({ "_or": [{ id: "email_welcome" }, { id: "email_welcome_title" }] })}`)
-        const emailTemplate = translations.find(t => t.id === "email_welcome")!
-        emailTemplate.english = emailTemplate.english.startsWith("file://") ? await fs.readFile(emailTemplate.english.replace("file:/", "."), { encoding: "utf8" }) : emailTemplate.english
-        emailTemplate.english = emailTemplate.english.replaceAll("%firstName%", user.firstName).replaceAll("%url%", url)
-        const emailTitle = translations.find(t => t.id === "email_welcome_title")!
-
+        // Use SendGrid dynamic template instead of manual template replacement
         await sendEmail({
             to: [{ email: user.email, name: user.firstName }],
-            content: emailTemplate.english,
-            subject: emailTitle.english,
-            contentType: "text/html",
+            template_id: "d-b1a5ed5e048c4b2baf6520ff16d8f73c", // Your SendGrid dynamic template ID
+            dynamic_template_data: {
+                "first_name": user.firstName,
+                "confirm_url": url
+            }
         })
 
         return url

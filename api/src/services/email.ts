@@ -15,8 +15,8 @@ export const defaultFrom: EmailRecipient = {
 
 export type EmailParams = {
     to: EmailRecipient[],
-    content: string,
-    subject: string,
+    content?: string,
+    subject?: string,
     contentType?: EmailContentType
     from?: EmailRecipient,
     cc?: EmailRecipient[],

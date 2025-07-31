@@ -41,11 +41,12 @@ services:
       - 'db:db'
 
   redis:
-    image: redis/redis-stack:latest
+    image: redis/redis-stack-server:latest
     restart: unless-stopped
     ports:
       - '7379:6379'
       - '7301:8001'
+    command: ["redis-server", "--replicaof", "no", "one"]
     # environment:
     volumes:
       - ./redis-data:/data

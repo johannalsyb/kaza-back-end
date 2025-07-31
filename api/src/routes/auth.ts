@@ -8,7 +8,7 @@ import crypto, { randomUUID } from "crypto"
 
 import { Api } from '../../../common/src/types/api'
 import Users, { countNewMatches, countNotifications, findById, findByEmail, sendPasswordResetEmail } from '../models/user'
-import { getAppUrl } from '../utils'
+import { getAppUrl, getFEAppUrl } from '../utils'
 import stripe from '../utils/payments/stripe'
 import redis from '../services/redis'
 import { OAuth2Client } from 'google-auth-library'
@@ -80,7 +80,7 @@ const route: BRoute = {
                     createdAt: new Date().toISOString()
                 })
 
-                const host = getAppUrl(request)
+                const host = getFEAppUrl(request)
                 Promise.all([
                     Users.email.sendVerifyEmail(user, host),
                     Users.phone.sendVerifySms(user)

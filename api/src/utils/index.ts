@@ -22,6 +22,9 @@ export const md5 = (data:string) => {
 }
 
 export const getAppUrl = (request?:BRequest) => {
+    return BASE_URL || request?.headers?.origin || (request?.headers?.referer ? request?.headers?.referer.substring(0, request?.headers?.referer.indexOf("/", 9)) : "http://localhost:7777")
+}
+export const getFEAppUrl = (request?:BRequest) => {
     return FE_APP_URL || request?.headers?.origin || (request?.headers?.referer ? request?.headers?.referer.substring(0, request?.headers?.referer.indexOf("/", 9)) : "http://localhost:7777")
 }
 

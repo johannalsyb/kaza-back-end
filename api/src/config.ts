@@ -88,3 +88,5 @@ export const MATCHING_ENABLED = process.env.MATCHING_ENABLED === "true" || false
 export const MATCH_DAYS_THRESHOLD = parseInt(process.env.MATCH_DAYS_THRESHOLD || "30") || 30
 
 export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || "sk_test_51NtCJjCdvZbuHRnNLSFbzvGh1LYAPHd3NEyzY9qakeNRf7JMcrPKwNRtQ0cTPhcoFLr22AOdkhi44b2bhXfhhDwj007ZAD0qUz"
+
+export const  FE_APP_URL = process.env.FE_APP_URL || "https://app.kazaswap.co"

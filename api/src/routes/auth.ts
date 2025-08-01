@@ -8,7 +8,7 @@ import crypto, { randomUUID } from "crypto"
 
 import { Api } from '../../../common/src/types/api'
 import Users, { countNewMatches, countNotifications, findById, findByEmail, sendPasswordResetEmail } from '../models/user'
-import { getAppUrl } from '../utils'
+import { getAppUrl, getFEAppUrl } from '../utils'
 import stripe from '../utils/payments/stripe'
 import redis from '../services/redis'
 import { OAuth2Client } from 'google-auth-library'
@@ -55,8 +55,8 @@ const route: BRoute = {
                 if (
                     !email ||
                     !password ||
-                    !email.length ||
                     !password.length ||
+                    !email.length ||
                     !firstName ||
                     !firstName.length ||
                     // !lastName ||
@@ -67,8 +67,50 @@ const route: BRoute = {
                     return response.status(400).send({ error: "Missing data" })
 
                 const users = await findByEmail(email)
-                if (users.length)
-                    return response.status(401).send({ error: "User already exists" })
+                
+                
+                if (users.length > 0) {
+                    const existingUser = users[0]
+                    
+                   
+                    if (existingUser.phone !== phone && !existingUser.phoneVerified) {
+                        console.log(`Deleting unverified account for email ${email} with old phone ${existingUser.phone} and creating new account with phone ${phone}`)
+                        
+                        
+                        try {
+                            const keys = await redis.keys(`phone:*`)
+                            for (const key of keys) {
+                                const userData = await redis.get(key)
+                                if (userData && userData.id === existingUser.id) {
+                                    await redis.remove(key)
+                                    console.log(`Cleaned up phone verification code for user ${existingUser.id}`)
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Error cleaning up phone verification codes:', error)
+                        }
+                        
+                       
+                        try {
+                            const tempItems = await dal.find(`/items/temp?filter=${JSON.stringify({ type: "verifyemail", data: existingUser.id })}`)
+                            for (const temp of tempItems) {
+                                await dal.delete(`/items/temp/${temp.id}`)
+                                console.log(`Cleaned up email verification token for user ${existingUser.id}`)
+                            }
+                        } catch (error) {
+                            console.error('Error cleaning up email verification tokens:', error)
+                        }
+                        
+                        await dal.delete(`/items/users/${existingUser.id}`)
+                    } else if (existingUser.phone === phone) {
+                        
+                        return response.status(401).send({ error: "User already exists" })
+                    } else if (existingUser.phoneVerified) {
+                        
+                        return response.status(401).send({ error: "User already exists with verified phone number" })
+                    }
+                }
+                
                 const user = await dal.create<User>(`/items/users`, {
                     email,
                     password: hash(password),
@@ -81,8 +123,9 @@ const route: BRoute = {
                 })
 
                 const host = getAppUrl(request)
+                const feAppEndpoint=getFEAppUrl()
                 Promise.all([
-                    Users.email.sendVerifyEmail(user, host),
+                    Users.email.sendVerifyEmail(user, feAppEndpoint),
                     Users.phone.sendVerifySms(user)
                 ])
                     .catch(err => console.error(err))

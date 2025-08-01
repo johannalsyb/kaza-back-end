@@ -1,7 +1,7 @@
 import {createHash} from "crypto"
 import {HTTPError} from "../../../common/src"
 import { BRequest } from "../types"
-import { BASE_URL } from "../config"
+import { BASE_URL, FE_APP_URL } from "../config"
 
 export const request = async (url:string, options?:RequestInit) => {
   try {
@@ -23,6 +23,9 @@ export const md5 = (data:string) => {
 
 export const getAppUrl = (request?:BRequest) => {
     return BASE_URL || request?.headers?.origin || (request?.headers?.referer ? request?.headers?.referer.substring(0, request?.headers?.referer.indexOf("/", 9)) : "http://localhost:7777")
+}
+export const getFEAppUrl = () => {
+    return FE_APP_URL
 }
 
 export const getBase64String = (arrayBuffer: ArrayBuffer): string => {

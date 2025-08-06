@@ -48,15 +48,12 @@ services:
     restart: unless-stopped
     command: [
       "redis-server",
-      "--maxmemory", "128mb",
-      "--maxmemory-policy", "allkeys-lru",
       "--replicaof", "no", "one"
     ]
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    mem_limit: 128m # Increased from 64MB
 
 volumes:
   db_data:

@@ -46,12 +46,10 @@ services:
     mem_limit: 256m
 
   redis:
-    image: redis/redis-stack:latest
+    image: redis/redis-stack-server:latest
     restart: unless-stopped
     command: [
       "redis-server",
-      "--maxmemory", "256mb",
-      "--maxmemory-policy", "allkeys-lru",
       "--replicaof", "no", "one"
     ]
     ports:

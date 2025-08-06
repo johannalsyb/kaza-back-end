@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.simple
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: kaza
+      DB_USER: kaza
+      DB_PASSWORD: kaza
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "8055:8055"  # Directus
+      - "4004:4004"  # API
+    volumes:
+      - ./directus/uploads:/app/directus/uploads
+    depends_on:
+      - db
+      - redis
+    mem_limit: 512m
+
+  db:
+    image: mariadb:10.6-focal
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: kaza
+      MYSQL_DATABASE: kaza
+      MYSQL_USER: kaza
+      MYSQL_PASSWORD: kaza
+    volumes:
+      - db_data:/var/lib/mysql
+    command: >
+      --innodb-buffer-pool-size=128M
+      --innodb-log-file-size=32M
+      --max-connections=100
+      --performance-schema=0
+    mem_limit: 256m
+
+  redis:
+    image: redis/redis-stack:latest
+    restart: unless-stopped
+    command: [
+      "redis-server",
+      "--maxmemory", "128mb",
+      "--maxmemory-policy", "allkeys-lru",
+      "--replicaof", "no", "one"
+    ]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    mem_limit: 128m # Increased from 64MB
+
+volumes:
+  db_data:
+  redis_data:

@@ -1,0 +1,44 @@
+FROM node:18-alpine
+
+# Install everything needed (remove nginx)
+RUN apk add --no-cache redis mariadb-client curl bash tzdata
+
+# Install Bun
+RUN curl -fsSL https://bun.sh/install | bash
+ENV PATH="/root/.bun/bin:${PATH}"
+
+# Configure Redis
+RUN mkdir -p /etc/redis && \
+    echo "bind 127.0.0.1" > /etc/redis/redis.conf && \
+    echo "daemonize yes" >> /etc/redis/redis.conf && \
+    echo "maxmemory 64mb" >> /etc/redis/redis.conf
+
+# Install Directus
+RUN npm install -g directus@10.8.1 --production
+
+# Setup workspace
+WORKDIR /app
+
+# Copy API files
+COPY ./api/package.json ./api/package-lock.json ./api/
+RUN cd api && npm install --production --no-audit
+COPY ./api/src ./api/src
+COPY ./api/assets ./api/assets
+COPY ./api/tsconfig.json ./api/
+COPY ./common ./common
+COPY ./directus/extensions ./directus/extensions
+
+# Simple startup script (remove nginx)
+RUN echo '#!/bin/bash' > /start.sh && \
+    echo 'redis-server /etc/redis/redis.conf' >> /start.sh && \
+    echo 'sleep 2' >> /start.sh && \
+    echo '[ -f "/app/dump.sql" ] && mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD $DB_DATABASE < /app/dump.sql' >> /start.sh && \
+    echo 'cd /app && npx directus bootstrap --skipAdminInit 2>/dev/null || true' >> /start.sh && \
+    echo 'HOST=0.0.0.0 PORT=8055 npx directus start &' >> /start.sh && \
+    echo 'sleep 10' >> /start.sh && \
+    echo 'cd /app/api && HOST=0.0.0.0 PORT=4004 bun run src/server.ts' >> /start.sh && \
+    chmod +x /start.sh
+
+EXPOSE 4004 8055
+
+CMD ["/start.sh"]

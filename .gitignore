@@ -16,7 +16,6 @@ api/~/.nvm/*
 node_modules/bun/*
 node_modules/bun/bin/bun.exe
 node_modules/bun/package.json
-Dockerfile.simple
 backup.sh
 dump.sql
 get-docker.sh

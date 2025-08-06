@@ -17,13 +17,15 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
     ports:
-      - "8055:8055"  # Directus
-      - "4004:4004"  # API
+      - "8055:8055"
+      - "4004:4004"
     volumes:
       - ./directus/uploads:/app/directus/uploads
     depends_on:
-      - db
-      - redis
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_started
     mem_limit: 512m
 
   db:
@@ -48,12 +50,20 @@ services:
     restart: unless-stopped
     command: [
       "redis-server",
+      "--maxmemory", "256mb",
+      "--maxmemory-policy", "allkeys-lru",
       "--replicaof", "no", "one"
     ]
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   db_data:

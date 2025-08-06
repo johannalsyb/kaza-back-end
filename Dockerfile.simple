@@ -1,24 +1,17 @@
-FROM node:18-alpine
-
 # Install everything needed (remove nginx)
 RUN apk add --no-cache redis mariadb-client curl bash tzdata
-
 # Install Bun
 RUN curl -fsSL https://bun.sh/install | bash
 ENV PATH="/root/.bun/bin:${PATH}"
-
 # Configure Redis
 RUN mkdir -p /etc/redis && \
     echo "bind 127.0.0.1" > /etc/redis/redis.conf && \
     echo "daemonize yes" >> /etc/redis/redis.conf && \
     echo "maxmemory 64mb" >> /etc/redis/redis.conf
-
 # Install Directus
 RUN npm install -g directus@10.8.1 --production
-
 # Setup workspace
 WORKDIR /app
-
 # Copy API files
 COPY ./api/package.json ./api/package-lock.json ./api/
 RUN cd api && npm install --production --no-audit
@@ -37,7 +30,5 @@ RUN echo '#!/bin/bash' > /start.sh && \
     echo 'sleep 10' >> /start.sh && \
     echo 'cd /app/api && HOST=0.0.0.0 PORT=4004 bun run src/server.ts' >> /start.sh && \
     chmod +x /start.sh
-
 EXPOSE 4004 8055
-
 CMD ["/start.sh"]

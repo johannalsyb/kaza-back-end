@@ -22,8 +22,6 @@ services:
     volumes:
       - ./directus/uploads:/app/directus/uploads
     depends_on:
-      redis:
-        condition: service_healthy
       db:
         condition: service_started
     mem_limit: 512m
@@ -46,25 +44,12 @@ services:
     mem_limit: 256m
 
   redis:
-    image: redis/redis-stack:latest
+    image: redis:alpine
     restart: unless-stopped
-    command: [
-      "redis-server",
-      "--maxmemory", "256mb",
-      "--maxmemory-policy", "allkeys-lru",
-      "--replicaof", "no", "one"
-    ]
+    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
     ports:
       - "6379:6379"
-    volumes:
-      - redis_data:/data
-    mem_limit: 256m
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    mem_limit: 128m
 
 volumes:
   db_data:
-  redis_data:

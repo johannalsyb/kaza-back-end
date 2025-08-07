@@ -150,7 +150,7 @@ const route: BRoute = {
                         console.log('notifications', notifications)
                         // 
                         //     response.status(200).send(notifications)
-                        response.status(200).send({})
+                        response.status(200).send([])
                     },
                     patch: async (request, response) => {
                         let { userId } = request.params

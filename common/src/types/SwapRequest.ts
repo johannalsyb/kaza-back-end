@@ -11,6 +11,7 @@ export type SwapRequest = {
     status: "pending" | "accepted" | "declined",
     notes: string | null,
     lastMessage: string | null,
+    nights: string | null,
 }
 
 export type ChatMessageInput = {

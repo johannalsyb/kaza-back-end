@@ -194,6 +194,15 @@ export const find = async (pattern:string) => {
 }
 
 /**
+ * List keys that match a pattern
+ * @param pattern The glob-style pattern, e.g. 'phone:*'
+ */
+export const keys = async (pattern: string) => {
+    const client = await getClient()
+    return client.keys(pattern)
+}
+
+/**
  * Save data to redis
  * @param key The key to save the data under
  * @param data The data to save
@@ -251,6 +260,7 @@ export default {
     ping,
     get,
     find,
+    keys,
     save,
     remove,
     exists,

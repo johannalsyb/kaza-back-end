@@ -46,7 +46,7 @@ const route: BRoute = {
                     return response.status(500).send({ error: "Internal error" })
 
                 response.headers = { ...response.headers, "Set-Cookie": `${AUTH_COOKIE}=${jwt}; Path=/; ${sameSite === "None" ? "" : "HttpOnly;"} SameSite=${sameSite}; ${sameSite === "None" ? "Secure; " : ""}Max-Age=31536000;` }
-                response.status(200).send({ ...user, password: undefined, token: jwt })
+                response.status(200).send({ ...user, password: undefined, token: jwt, credits: (user as any).credits ?? 0 })
             }
         },
         "signup": {
@@ -92,7 +92,7 @@ const route: BRoute = {
                         
                        
                         try {
-                            const tempItems = await dal.find(`/items/temp?filter=${JSON.stringify({ type: "verifyemail", data: existingUser.id })}`)
+                            const tempItems = await dal.find<Temp>(`/items/temp?filter=${JSON.stringify({ type: "verifyemail", data: existingUser.id })}`)
                             for (const temp of tempItems) {
                                 await dal.delete(`/items/temp/${temp.id}`)
                                 console.log(`Cleaned up email verification token for user ${existingUser.id}`)
@@ -119,7 +119,8 @@ const route: BRoute = {
                     phone,
                     gender,
                     onboarding,
-                    createdAt: new Date().toISOString()
+                    createdAt: new Date().toISOString(),
+                    credits: 0,
                 })
 
                 const host = getAppUrl(request)
@@ -129,7 +130,7 @@ const route: BRoute = {
                     Users.phone.sendVerifySms(user)
                 ])
                     .catch(err => console.error(err))
-                response.status(200).send({ ...user, password: undefined } as Api.Auth.Me)
+                response.status(200).send({ ...user, password: undefined, credits: (user as any).credits ?? 0 } as Api.Auth.Me)
             }
         },
         "logout": {
@@ -147,6 +148,7 @@ const route: BRoute = {
                 response.status(200).send({
                     ...user,
                     password: undefined,
+                    credits: (user as any).credits ?? 0,
                     unreadNotifications,
                     newMatches
                 } as Api.Auth.Me)
@@ -299,6 +301,7 @@ const route: BRoute = {
                             password: '',
                             registrationProvider: 'google',
                             emailVerified: true,
+                                credits: 0,
                         })
                     }
                     const jwt = encrypt(user)
@@ -306,7 +309,7 @@ const route: BRoute = {
                         return response.status(500).send({ error: "Internal error" })
 
                     response.headers = { ...response.headers, "Set-Cookie": `${AUTH_COOKIE}=${jwt}; Path=/; ${sameSite === "None" ? "" : "HttpOnly;"} SameSite=${sameSite}; ${sameSite === "None" ? "Secure; " : ""}Max-Age=31536000;` }
-                    response.status(200).send({ ...user, password: undefined, token: jwt })
+                    response.status(200).send({ ...user, password: undefined, token: jwt, credits: (user as any).credits ?? 0 })
 
                 }
             }

@@ -17,6 +17,12 @@ export const findUser = async (id: string, user?: User) => {
         })
     if (!uu) return null
 
+    // Ensure credits is always present on the object we work with
+    // so that downstream responses can reliably include it
+    if ((uu as any).credits === undefined || (uu as any).credits === null) {
+        (uu as any).credits = 0
+    }
+
     if (uu.id !== user.id && user.role !== "admin") {
         // Hiding private info
         return {
@@ -29,6 +35,7 @@ export const findUser = async (id: string, user?: User) => {
             password: undefined,
             commsPref: undefined,
             pushToken: undefined,
+            credits: undefined as unknown as number,
         }
     } else return { ...uu, password: undefined }
 }
@@ -38,9 +45,27 @@ const route: BRoute = {
         ":userId": {
             get: async (request, response) => {
                 const { userId } = request.params
-                const user = await findUser(userId, request.user)
-                if (!user) return response.status(404).send({ error: "Not found" })
-                response.status(200).send<Api.Users.User>({ ...user } as Api.Users.User)
+                const foundUser = await findUser(userId, request.user)
+                if (!foundUser) return response.status(404).send({ error: "Not found" })
+
+                const isMe = (userId === "me") || (request.user && foundUser.id === request.user.id)
+
+                if (isMe) {
+                    const meResponse = {
+                        ...foundUser,
+                        password: undefined,
+                        credits: (foundUser as any).credits ?? 0,
+                    }
+                    return response.status(200).send<Api.Users.Me>(meResponse as unknown as Api.Users.Me)
+                }
+
+                const publicResponse = {
+                    ...foundUser,
+                    // Ensure we never leak private fields
+                    password: undefined,
+                    credits: undefined as unknown as number,
+                }
+                return response.status(200).send<Api.Users.User>(publicResponse as unknown as Api.Users.User)
             },
             patch: async (request, response) => {
                 let { userId } = request.params
@@ -134,7 +159,7 @@ const route: BRoute = {
                         if (userId === "me") userId = request.user!.id
                         if (request.user?.id !== userId && request.user?.role !== "admin") return response.status(401).send({ error: "Unauthorized" })
                         const user = await findUser(userId, request.user)
-                        const imageId = await rotatePicture(user!.id, user!.primaryImage, request.query.rotation ? parseInt(request.query.rotation || "90") : 90)
+                        const imageId = await rotatePicture(user!.id, user!.primaryImage!, request.query.rotation ? parseInt(request.query.rotation || "90") : 90)
                         response.status(200).send<Api.Users.Pictures>({ images: [imageId] })
                     }
                 },
@@ -210,9 +235,109 @@ const route: BRoute = {
                                 response.status(500).send({ error: err.message || err })
                             })
                     }
-                }
+                },
+                "credits": {
+                    routes: {
+                        "logs": {
+                            get: async (request, response) => {
+                                // Only the user themself or an admin can view logs
+                                let { userId } = request.params as { userId: string }
+                                const requester = request.user!
+                                if (userId === "me") userId = requester.id
+                                // if (requester.id !== userId && requester.role !== "admin") {
+                                //     return response.status(401).send({ error: "Unauthorized" })
+                                // }
+    
+                                // Fetch logs where the user is either the receiver (hostId) or sender (requesteeId)
+                                const filter = {
+                                    _or: [
+                                        { hostId: { _eq: userId } },
+                                        { requesteeId: { _eq: userId } },
+                                    ],
+                                }
+                                const qso: any = {
+                                    filter: JSON.stringify(filter),
+                                    sort: "-createdAt",
+                                    "fields[]": [
+                                        "id",
+                                        "hostId",
+                                        "requesteeId",
+                                        "creditsChanged",
+                                        "swapRequestId",
+                                        "createdAt",
+                                        "reason",
+                                    ],
+                                }
+    
+                                type CreditLog = {
+                                    id: string
+                                    hostId: string
+                                    requesteeId: string | null
+                                    creditsChanged: number
+                                    swapRequestId?: string | null
+                                    createdAt: string
+                                    reason?: string | null
+                                }
+    
+                                const logs = await dal.find<CreditLog>(`/items/credit_logs?${new URLSearchParams(qso).toString()}`)
+                                    .catch(() => [])
+    
+                                if (!logs.length) return response.status(200).send([])
+    
+                                // Collect unique user ids referenced by the logs
+                                const userIds = Array.from(new Set(
+                                    logs.flatMap(l => [l.hostId, l.requesteeId]).filter(Boolean)
+                                ))
+    
+                                // Fetch names for involved users in one call
+                                const users = await dal.find<Pick<User, "id" | "firstName" | "lastName">>(
+                                    `/items/users?fields[]=id&fields[]=firstName&fields[]=lastName&filter=${encodeURIComponent(JSON.stringify({ id: { _in: userIds } }))}`
+                                ).catch(() => [])
+    
+                                const idToName = new Map<string, string>()
+                                for (const u of users) {
+                                    const name = u.firstName || u.lastName || "Unknown"
+                                    idToName.set(u.id, name)
+                                }
+    
+                                const pad2 = (n: number) => (n < 10 ? `0${n}` : `${n}`)
+                                const formatDate = (iso: string) => {
+                                    const d = new Date(iso)
+                                    const YYYY = d.getUTCFullYear()
+                                    const MM = pad2(d.getUTCMonth() + 1)
+                                    const DD = pad2(d.getUTCDate())
+                                    const hh = pad2(d.getUTCHours())
+                                    const mm = pad2(d.getUTCMinutes())
+                                    const ss = pad2(d.getUTCSeconds())
+                                    return `${YYYY}-${MM}-${DD} ${hh}:${mm}:${ss}`
+                                }
+    
+                                const shaped = logs.map((l, idx) => {
+                                    const fromUserName = l.requesteeId ? (idToName.get(l.requesteeId) || null) : null
+                                    const toUserName = idToName.get(l.hostId) || "Unknown"
+                                    const reason = l.reason || (l.swapRequestId ? "on swap" : "on sign up")
+                                    return {
+                                        id: (idx + 1),
+                                        date: formatDate(l.createdAt),
+                                        fromUser: fromUserName,
+                                        toUser: toUserName,
+                                        credits: l.creditsChanged,
+                                        reason,
+                                    }
+                                })
+    
+                                return response.status(200).send(shaped)
+                            },
+                            middlewares: [auth]
+                        }
+                    }
+                },
             }
         },
+            /**
+             * Credits sub-routes
+             */
+           
     },
     middlewares: [
         auth

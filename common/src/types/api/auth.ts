@@ -7,6 +7,7 @@ export type Me = {
     createdAt: string
     updatedAt: string
     onboarding: string
+    credits: number
 }
 
 export type Login = Me

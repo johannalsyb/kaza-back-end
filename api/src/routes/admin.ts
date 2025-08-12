@@ -10,7 +10,7 @@ import bubble from '../utils/bubble'
 import { SwapRequest } from '../../../common/src/types/SwapRequest'
 import { Swap } from '../../../common/src/types/Swap'
 import { getChat, getChatUrl } from '../models/swapRequest'
-import redis from '../services/redis'
+import redis, { getClient } from '../services/redis'
 import { DAEMON_INCOMPLETE_PROFILES_CHECK_HRS } from '../config'
 import { checkIncompleteProfiles } from '../daemon'
 import fs from "fs/promises"
@@ -53,15 +53,34 @@ const route:BRoute = {
                                     return response.status(400).send({error: "No property for this user"})
                                 }
 
-                                Promise.all([
-                                    dal.update<Property>(`/items/properties/${props[0].id}`, {verified: request.query.verify === "true", private: request.query.verify !== "true"}),
-                                    dal.update<User>(`/items/users/${userId}`, {verified: request.query.verify === "true"})
-                                ])
-                                .then(([p, u]) => {
-                                    return Promise.all([sendAccountVerifiedEmail(u), u])
-                                })
-                                .then(([_, u]) => response.status(200).send<User>(u))
-                                .catch((e:any) => response.status(500).send({error: e.message}))
+                                try {
+                                    const property = props[0]
+                                    const wasVerified = !!property.verified
+                                    const willVerify = request.query.verify === "true"
+
+                                    const [updatedProp, updatedUser] = await Promise.all([
+                                        dal.update<Property>(`/items/properties/${property.id}`, {verified: willVerify, private: !willVerify}),
+                                        dal.update<User>(`/items/users/${userId}`, {verified: willVerify})
+                                    ])
+
+                                    if (!wasVerified && willVerify) {
+                                        await dal.update<User>(`/items/users/${userId}`, { credits: { _increment: 5 } as any })
+                                        // log signup/property verification credit
+                                        await dal.create(`/items/credit_logs`, {
+                                            hostId: userId,
+                                            requesteeId: null,
+                                            creditsChanged: 5,
+                                            swapRequestId: null,
+                                            reason: "on sign up",
+                                            createdAt: new Date().toISOString()
+                                        })
+                                    }
+
+                                    await sendAccountVerifiedEmail(updatedUser)
+                                    response.status(200).send<User>(updatedUser)
+                                } catch(e:any) {
+                                    response.status(500).send({error: e.message})
+                                }
                             }
                         },
                         "resetPassword": {
@@ -165,9 +184,30 @@ const route:BRoute = {
                                 let {propId} = request.params
                                 if(!request.query.verify || (request.query.verify !== "true" && request.query.verify !== "false"))
                                 return response.status(400).send({error: "Invalid request"})
-                                dal.update<Property>(`/items/properties/${propId}`, {verified: request.query.verify === "true", private: request.query.verify !== "true"})
-                                .then(p => response.status(200).send<Property>(p))
-                                .catch((e:any) => response.status(500).send({error: e.message}))
+                                try {
+                                    const property = await dal.get<Property>(`/items/properties/${propId}`)
+                                    const wasVerified = !!property.verified
+                                    const willVerify = request.query.verify === "true"
+
+                                    const updated = await dal.update<Property>(`/items/properties/${propId}`, {verified: willVerify, private: !willVerify})
+
+                                    if (!wasVerified && willVerify && property.owner) {
+                                        await dal.update<User>(`/items/users/${property.owner}`, { credits: { _increment: 5 } as any })
+                                        // log signup/property verification credit
+                                        await dal.create(`/items/credit_logs`, {
+                                            hostId: property.owner,
+                                            requesteeId: null,
+                                            creditsChanged: 5,
+                                            swapRequestId: null,
+                                            reason: "on sign up",
+                                            createdAt: new Date().toISOString()
+                                        })
+                                    }
+
+                                    response.status(200).send<Property>(updated)
+                                } catch (e:any) {
+                                    response.status(500).send({error: e.message})
+                                }
                             }
                         },
                     }
@@ -211,6 +251,90 @@ const route:BRoute = {
                 })
                 .then(d => response.status(201).send(d))
                 .catch((e:any) => response.status(500).send({error: e.message}))
+            }
+        }
+        ,
+        "credits": {
+            routes: {
+                "logs": {
+                    get: async (request, response) => {
+                        const qso: any = {
+                            sort: "-createdAt",
+                            "fields[]": [
+                                "id",
+                                "hostId",
+                                "requesteeId",
+                                "creditsChanged",
+                                "swapRequestId",
+                                "createdAt",
+                                "reason",
+                            ],
+                            limit: request.query.limit || "-1",
+                        }
+
+                        type CreditLog = {
+                            id: string
+                            hostId: string
+                            requesteeId: string | null
+                            creditsChanged: number
+                            swapRequestId?: string | null
+                            createdAt: string
+                            reason?: string | null
+                        }
+
+                        const logs = await dal
+                            .find<CreditLog>(`/items/credit_logs?${new URLSearchParams(qso).toString()}`)
+                            .catch(() => [])
+
+                        if (!logs.length) return response.status(200).send([])
+
+                        const userIds = Array.from(
+                            new Set(logs.flatMap((l) => [l.hostId, l.requesteeId]).filter(Boolean) as string[])
+                        )
+
+                        const users = await dal
+                            .find<Pick<User, "id" | "firstName" | "lastName">>(
+                                `/items/users?fields[]=id&fields[]=firstName&fields[]=lastName&filter=${encodeURIComponent(
+                                    JSON.stringify({ id: { _in: userIds } })
+                                )}`
+                            )
+                            .catch(() => [])
+
+                        const idToName = new Map<string, string>()
+                        for (const u of users) {
+                            const name = u.firstName || u.lastName || "Unknown"
+                            idToName.set(u.id, name)
+                        }
+
+                        const pad2 = (n: number) => (n < 10 ? `0${n}` : `${n}`)
+                        const formatDate = (iso: string) => {
+                            const d = new Date(iso)
+                            const YYYY = d.getUTCFullYear()
+                            const MM = pad2(d.getUTCMonth() + 1)
+                            const DD = pad2(d.getUTCDate())
+                            const hh = pad2(d.getUTCHours())
+                            const mm = pad2(d.getUTCMinutes())
+                            const ss = pad2(d.getUTCSeconds())
+                            return `${YYYY}-${MM}-${DD} ${hh}:${mm}:${ss}`
+                        }
+
+                        const shaped = logs.map((l, idx) => {
+                            const fromUserName = l.requesteeId ? idToName.get(l.requesteeId) || null : null
+                            const toUserName = idToName.get(l.hostId) || "Unknown"
+                            const reason = l.reason || (l.swapRequestId ? "on swap" : "on sign up")
+                            return {
+                                id: idx + 1,
+                                date: formatDate(l.createdAt),
+                                fromUser: fromUserName,
+                                toUser: toUserName,
+                                credits: l.creditsChanged,
+                                reason,
+                            }
+                        })
+
+                        return response.status(200).send(shaped)
+                    }
+                }
             }
         }
         // "bubble": {

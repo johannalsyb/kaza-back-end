@@ -111,6 +111,42 @@ const route: BRoute = {
                 // const tuser = await dal.get<Partial<User>>(`/items/users/${toProperty.owner}?fields=verified`)
                 // if(!tuser || !tuser.verified) return response.status(400).send({error: "User not verified"})
 
+                // Nights requested for this swap
+                const nightsRaw = request.body?.nights
+                const nights = Math.max(
+                    1,
+                    typeof nightsRaw === "number" ? nightsRaw : (parseInt(nightsRaw || "1", 10) || 1)
+                )
+
+                // Check availability on target property (best-effort based on dateDuration text)
+                const inferAvailableNights = (p: Property): number | null => {
+                    try {
+                        if (p.dateDuration && typeof p.dateDuration === "string") {
+                            // Try ranges like "3-5", "3 to 5"
+                            const range = p.dateDuration.match(/(\d+)\s*(?:-|to)\s*(\d+)/i)
+                            if (range) return parseInt(range[2]!, 10)
+                            const single = p.dateDuration.match(/\d+/)
+                            if (single) return parseInt(single[0]!, 10)
+                        }
+                    } catch {}
+                    return null
+                }
+                const availableNights = inferAvailableNights(toProperty)
+                if (availableNights !== null && nights > availableNights) {
+                    return response.status(400).send({
+                        error: "Requested nights exceed property's available duration",
+                        requested: nights,
+                        available: availableNights,
+                    })
+                }
+
+                // Ensure requester has enough credits at request time
+                const requester = await dal.get<Partial<User>>(`/items/users/${u.id}?fields=credits`).catch(err => null)
+                const availableCredits = (requester as any)?.credits ?? 0
+                if (availableCredits < nights) {
+                    return response.status(400).send({ error: "Insufficient credits", required: nights, available: availableCredits })
+                }
+
                 const qso = {
                     filter: JSON.stringify({
                         "_and": [
@@ -345,6 +381,7 @@ const route: BRoute = {
                                         creditsChanged: nights,
                                         swapRequestId: sr.id,
                                         reason: "on swap",
+                                        details: JSON.stringify({ type: "swap_finalize", nights }),
                                         createdAt: new Date().toISOString()
                                     });
 
@@ -379,6 +416,79 @@ const route: BRoute = {
                                 }).catch(err => null)
 
                                 response.status(200).send(up)
+                            }
+                        },
+                        "revert": {
+                            post: async (request, response) => {
+                                const u = request.user!
+                                const { swapRequestId } = request.params
+                                const sr = await dal.get<SwapRequest>(`/items/swap_requests/${swapRequestId}`).catch(err => null)
+                                if (!sr || (sr.from !== u.id && sr.to !== u.id && u.role !== "admin")) return response.status(404).send({ error: "Not found" })
+
+                                // Only host or admin can initiate a revert
+                                const isHost = u.id === sr?.to
+                                const isAdmin = u.role === "admin" || u.role === "superadmin"
+                                if (!(isHost || isAdmin)) return response.status(401).send({ error: "Unauthorized" })
+
+                                // Determine booked nights on the swap
+                                const nightsRaw = (sr as any).nights
+                                const bookedNights = Math.max(
+                                    1,
+                                    typeof nightsRaw === "number" ? nightsRaw : (parseInt(nightsRaw || "1", 10) || 1)
+                                )
+
+                                // Calculate previously reverted credits for this swap
+                                type CreditLog = { creditsChanged: number }
+                                const revertedLogs = await dal.find<CreditLog>(
+                                    `/items/credits_logs?filter=${encodeURIComponent(JSON.stringify({ swapRequestId: sr.id, reason: "revert" }))}&fields[]=creditsChanged&limit=-1`
+                                ).catch(() => [])
+                                const alreadyReverted = revertedLogs
+                                    .map(l => (l.creditsChanged < 0 ? -l.creditsChanged : 0))
+                                    .reduce((a, b) => a + b, 0)
+
+                                // Read input: either stayedNights or revertBy
+                                const stayedNightsRaw = request.body?.stayedNights
+                                const revertByRaw = request.body?.revertBy
+
+                                let revertBy = 0
+                                if (stayedNightsRaw !== undefined && stayedNightsRaw !== null) {
+                                    const used = Math.max(0, typeof stayedNightsRaw === "number" ? stayedNightsRaw : (parseInt(stayedNightsRaw, 10) || 0))
+                                    revertBy = Math.max(0, bookedNights - used - alreadyReverted)
+                                } else if (revertByRaw !== undefined && revertByRaw !== null) {
+                                    revertBy = Math.max(0, typeof revertByRaw === "number" ? revertByRaw : (parseInt(revertByRaw, 10) || 0))
+                                }
+
+                                const remainingToRevert = Math.max(0, bookedNights - alreadyReverted)
+                                if (revertBy <= 0) return response.status(400).send({ error: "Invalid revert amount" })
+                                if (revertBy > remainingToRevert) return response.status(400).send({ error: "Revert exceeds remaining nights", remaining: remainingToRevert })
+
+                                // Ensure host has enough credits to give back
+                                const host = await dal.get<Partial<User>>(`/items/users/${sr.to}?fields=credits`).catch(err => null)
+                                const hostCredits = (host as any)?.credits ?? 0
+                                if (hostCredits < revertBy) {
+                                    return response.status(400).send({ error: "Host has insufficient credits to revert", required: revertBy, available: hostCredits })
+                                }
+
+                                // Perform transfers: host -revertBy, requestee +revertBy
+                                await dal.update<User>(`/items/users/${sr.to}`, {
+                                    credits: { _decrement: revertBy } as any
+                                })
+                                await dal.update<User>(`/items/users/${sr.from}`, {
+                                    credits: { _increment: revertBy } as any
+                                })
+
+                                // Log revert as negative on host side
+                                await dal.create(`/items/credits_logs`, {
+                                    hostId: sr.to,
+                                    requesteeId: sr.from,
+                                    creditsChanged: -revertBy,
+                                    swapRequestId: sr.id,
+                                    reason: "revert",
+                                    details: JSON.stringify({ type: "revert", bookedNights, stayedNights: (stayedNightsRaw ?? null), revertBy }),
+                                    createdAt: new Date().toISOString()
+                                })
+
+                                return response.status(200).send({ reverted: revertBy, remaining: remainingToRevert - revertBy })
                             }
                         },
                         "decline": {

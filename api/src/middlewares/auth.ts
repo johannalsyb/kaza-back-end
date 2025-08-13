@@ -113,9 +113,14 @@ const auth:BMiddleware = async (req, res) => {
     if(skip) return
     try {
         const user = await getUserFromRequest(req)
-        if(!user) return {code: 401, message: "Unauthorized"}
+        if(!user) {
+            console.log("Auth middleware: No user found in request")
+            return {code: 401, message: "Unauthorized"}
+        }
+        console.log(`Auth middleware: User ${user.id} authenticated with role "${user.role}"`)
         req.user = user
     } catch(err:any) {
+        console.error("Auth middleware error:", err)
         return {code: 500, message: err.message}
     }
 }

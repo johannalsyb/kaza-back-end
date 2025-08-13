@@ -64,16 +64,28 @@ const route:BRoute = {
                                     ])
 
                                     if (!wasVerified && willVerify) {
-                                        await dal.update<User>(`/items/users/${userId}`, { credits: { _increment: 5 } as any })
-                                        // log signup/property verification credit
-                                        await dal.create(`/items/credits_logs`, {
-                                            hostId: userId,
-                                            requesteeId: null,
-                                            creditsChanged: 5,
-                                            swapRequestId: null,
-                                            reason: "on sign up",
-                                            createdAt: new Date().toISOString()
-                                        })
+                                        try {
+                                            // Get current user credits
+                                            const currentUser = await dal.get<User>(`/items/users/${userId}?fields=credits`).catch(() => ({ credits: 0 }))
+                                            const currentCredits = (currentUser as any)?.credits ?? 0
+                                            const newCredits = currentCredits + 5
+                                            
+                                            // Update user credits
+                                            await dal.update<User>(`/items/users/${userId}`, { credits: newCredits })
+                                            
+                                            // log signup/property verification credit
+                                            await dal.create(`/items/credits_logs`, {
+                                                hostId: userId,
+                                                requesteeId: null,
+                                                creditsChanged: 5,
+                                                swapRequestId: null,
+                                                reason: "user verification",
+                                                createdAt: new Date().toISOString()
+                                            })
+                                            console.log(`Created credits log for user verification: ${userId}, credits: ${currentCredits} -> ${newCredits}`)
+                                        } catch (logError) {
+                                            console.error("Failed to update credits or create log:", logError)
+                                        }
                                     }
 
                                     await sendAccountVerifiedEmail(updatedUser)
@@ -192,16 +204,28 @@ const route:BRoute = {
                                     const updated = await dal.update<Property>(`/items/properties/${propId}`, {verified: willVerify, private: !willVerify})
 
                                     if (!wasVerified && willVerify && property.owner) {
-                                        await dal.update<User>(`/items/users/${property.owner}`, { credits: { _increment: 5 } as any })
-                                        // log signup/property verification credit
-                                        await dal.create(`/items/credits_logs`, {
-                                            hostId: property.owner,
-                                            requesteeId: null,
-                                            creditsChanged: 5,
-                                            swapRequestId: null,
-                                            reason: "on sign up",
-                                            createdAt: new Date().toISOString()
-                                        })
+                                        try {
+                                            // Get current user credits
+                                            const currentUser = await dal.get<User>(`/items/users/${property.owner}?fields=credits`).catch(() => ({ credits: 0 }))
+                                            const currentCredits = (currentUser as any)?.credits ?? 0
+                                            const newCredits = currentCredits + 5
+                                            
+                                            // Update user credits
+                                            await dal.update<User>(`/items/users/${property.owner}`, { credits: newCredits })
+                                            
+                                            // log signup/property verification credit
+                                            await dal.create(`/items/credits_logs`, {
+                                                hostId: property.owner,
+                                                requesteeId: null,
+                                                creditsChanged: 5,
+                                                swapRequestId: null,
+                                                reason: "property verification",
+                                                createdAt: new Date().toISOString()
+                                            })
+                                            console.log(`Created credits log for property verification: ${property.owner}, credits: ${currentCredits} -> ${newCredits}`)
+                                        } catch (logError) {
+                                            console.error("Failed to update credits or create log:", logError)
+                                        }
                                     }
 
                                     response.status(200).send<Property>(updated)

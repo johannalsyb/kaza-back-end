@@ -143,6 +143,17 @@ const route: BRoute = {
                 // Ensure requester has enough credits at request time
                 const requester = await dal.get<Partial<User>>(`/items/users/${u.id}?fields=credits`).catch(err => null)
                 const availableCredits = (requester as any)?.credits ?? 0
+                
+                // Prevent users from requesting more nights than they have credits
+                if (nights > availableCredits) {
+                    return response.status(400).send({ 
+                        error: "Cannot request more nights than available credits", 
+                        requested: nights,
+                        available: availableCredits
+                    })
+                }
+                
+                // Ensure requester has enough credits for the requested nights
                 if (availableCredits < nights) {
                     return response.status(400).send({ error: "Insufficient credits", required: nights, available: availableCredits })
                 }

@@ -83,6 +83,8 @@ const route: BRoute = {
                 const {
                     fromPropertyId,
                     toPropertyId,
+                    dateFrom,
+                    dateTo,
                 } = request.body
                 if (!toPropertyId) return response.status(400).send({ error: "Missing data" })
 
@@ -111,12 +113,27 @@ const route: BRoute = {
                 // const tuser = await dal.get<Partial<User>>(`/items/users/${toProperty.owner}?fields=verified`)
                 // if(!tuser || !tuser.verified) return response.status(400).send({error: "User not verified"})
 
-                // Nights requested for this swap
-                const nightsRaw = request.body?.nights
-                const nights = Math.max(
-                    1,
-                    typeof nightsRaw === "number" ? nightsRaw : (parseInt(nightsRaw || "1", 10) || 1)
-                )
+                // Calculate nights from dateFrom and dateTo, or use nights field as fallback
+                let nights = 1
+                if (dateFrom && dateTo) {
+                    try {
+                        const startDate = new Date(dateFrom)
+                        const endDate = new Date(dateTo)
+                        const timeDiff = endDate.getTime() - startDate.getTime()
+                        const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24))
+                        nights = Math.max(1, daysDiff)
+                    } catch (dateError) {
+                        console.error("Error calculating nights from dates:", dateError)
+                        nights = 1
+                    }
+                } else {
+                    // Fallback to nights field if dates not provided
+                    const nightsRaw = request.body?.nights
+                    nights = Math.max(
+                        1,
+                        typeof nightsRaw === "number" ? nightsRaw : (parseInt(nightsRaw || "1", 10) || 1)
+                    )
+                }
 
                 // Check availability on target property (best-effort based on dateDuration text)
                 const inferAvailableNights = (p: Property): number | null => {
@@ -132,6 +149,7 @@ const route: BRoute = {
                     return null
                 }
                 const availableNights = inferAvailableNights(toProperty)
+                
                 if (availableNights !== null && nights > availableNights) {
                     return response.status(400).send({
                         error: "Requested nights exceed property's available duration",
@@ -143,6 +161,16 @@ const route: BRoute = {
                 // Ensure requester has enough credits at request time
                 const requester = await dal.get<Partial<User>>(`/items/users/${u.id}?fields=credits`).catch(err => null)
                 const availableCredits = (requester as any)?.credits ?? 0
+                
+                // Prevent users from swapping if property's maximum availability exceeds their credits
+                if (availableNights !== null && availableNights > availableCredits) {
+                    return response.status(400).send({
+                        error: "Property availability exceeds your credits",
+                        available: availableCredits,
+                        propertyAvailability: availableNights,
+                        message: `You need at least ${availableNights} credits for this property`
+                    })
+                }
                 
                 // Prevent users from requesting more nights than they have credits
                 if (nights > availableCredits) {
@@ -181,6 +209,9 @@ const route: BRoute = {
                     to: toProperty.owner,
                     fromProperty: fromProperty.id,
                     toProperty: toProperty.id,
+                    nights: nights.toString(),
+                    dateFrom: dateFrom || null,
+                    dateTo: dateTo || null,
                     createdAt: new Date().toISOString()
                 }
                 const sr = await dal.create<SwapRequest>(`/items/swap_requests`, data)
@@ -375,26 +406,30 @@ const route: BRoute = {
                                     )
 
                                     // Host gets credits
-                                    await dal.update<User>(`/items/users/${sr.to}`, {
-                                        credits: { _increment: nights } as any
-                                    });
+                                    try {
+                                        const hostUser = await dal.get<User>(`/items/users/${sr.to}?fields=credits`).catch(() => ({ credits: 0 }))
+                                        const hostCredits = (hostUser as any)?.credits ?? 0
+                                        await dal.update<User>(`/items/users/${sr.to}`, { credits: hostCredits + nights })
+                                        
+                                        // Requestee loses credits
+                                        const requesteeUser = await dal.get<User>(`/items/users/${sr.from}?fields=credits`).catch(() => ({ credits: 0 }))
+                                        const requesteeCredits = (requesteeUser as any)?.credits ?? 0
+                                        await dal.update<User>(`/items/users/${sr.from}`, { credits: Math.max(0, requesteeCredits - nights) })
 
-                                    // Requestee loses credits
-                                    await dal.update<User>(`/items/users/${sr.from}`, {
-                                        credits: { _decrement: nights } as any
-                                    });
-
-
-                                    // log credit changes (so frontend can show it)
-                                    await dal.create(`/items/credits_logs`, {
-                                        hostId: sr.to,
-                                        requesteeId: sr.from,
-                                        creditsChanged: nights,
-                                        swapRequestId: sr.id,
-                                        reason: "on swap",
-                                        details: JSON.stringify({ type: "swap_finalize", nights }),
-                                        createdAt: new Date().toISOString()
-                                    });
+                                        // log credit changes (so frontend can show it)
+                                        await dal.create(`/items/credits_logs`, {
+                                            hostId: sr.to,
+                                            requesteeId: sr.from,
+                                            creditsChanged: nights,
+                                            swapRequestId: sr.id,
+                                            reason: "on swap",
+                                            details: JSON.stringify({ type: "swap_finalize", nights }),
+                                            createdAt: new Date().toISOString()
+                                        });
+                                        console.log(`Created swap credits log: host ${sr.to} +${nights}, requestee ${sr.from} -${nights}`)
+                                    } catch (creditError) {
+                                        console.error("Failed to update credits or create swap log:", creditError)
+                                    }
 
                                     await Promise.all([
                                         notification({

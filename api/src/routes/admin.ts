@@ -194,14 +194,19 @@ const route:BRoute = {
                                     if (!wasVerified && willVerify && property.owner) {
                                         await dal.update<User>(`/items/users/${property.owner}`, { credits: { _increment: 5 } as any })
                                         // log signup/property verification credit
-                                        await dal.create(`/items/credits_logs`, {
-                                            hostId: property.owner,
-                                            requesteeId: null,
-                                            creditsChanged: 5,
-                                            swapRequestId: null,
-                                            reason: "on sign up",
-                                            createdAt: new Date().toISOString()
-                                        })
+                                        try {
+                                            await dal.create(`/items/credits_logs`, {
+                                                hostId: property.owner,
+                                                requesteeId: null,
+                                                creditsChanged: 5,
+                                                swapRequestId: null,
+                                                reason: "property verification",
+                                                createdAt: new Date().toISOString()
+                                            })
+                                            console.log(`Created credits log for property verification: ${property.owner}`)
+                                        } catch (logError) {
+                                            console.error("Failed to create credits log:", logError)
+                                        }
                                     }
 
                                     response.status(200).send<Property>(updated)

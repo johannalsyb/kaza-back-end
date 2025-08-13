@@ -66,7 +66,7 @@ const route:BRoute = {
                                     if (!wasVerified && willVerify) {
                                         await dal.update<User>(`/items/users/${userId}`, { credits: { _increment: 5 } as any })
                                         // log signup/property verification credit
-                                        await dal.create(`/items/credit_logs`, {
+                                        await dal.create(`/items/credits_logs`, {
                                             hostId: userId,
                                             requesteeId: null,
                                             creditsChanged: 5,
@@ -194,7 +194,7 @@ const route:BRoute = {
                                     if (!wasVerified && willVerify && property.owner) {
                                         await dal.update<User>(`/items/users/${property.owner}`, { credits: { _increment: 5 } as any })
                                         // log signup/property verification credit
-                                        await dal.create(`/items/credit_logs`, {
+                                        await dal.create(`/items/credits_logs`, {
                                             hostId: property.owner,
                                             requesteeId: null,
                                             creditsChanged: 5,
@@ -283,7 +283,7 @@ const route:BRoute = {
                         }
 
                         const logs = await dal
-                            .find<CreditLog>(`/items/credit_logs?${new URLSearchParams(qso).toString()}`)
+                            .find<CreditLog>(`/items/credits_logs?${new URLSearchParams(qso).toString()}`)
                             .catch(() => [])
 
                         if (!logs.length) return response.status(200).send([])

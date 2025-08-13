@@ -339,7 +339,7 @@ const route: BRoute = {
 
 
                                     // log credit changes (so frontend can show it)
-                                    await dal.create(`/items/credit_logs`, {
+                                    await dal.create(`/items/credits_logs`, {
                                         hostId: sr.to,
                                         requesteeId: sr.from,
                                         creditsChanged: nights,

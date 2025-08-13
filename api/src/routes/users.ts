@@ -279,7 +279,7 @@ const route: BRoute = {
                                     reason?: string | null
                                 }
     
-                                const logs = await dal.find<CreditLog>(`/items/credit_logs?${new URLSearchParams(qso).toString()}`)
+                                const logs = await dal.find<CreditLog>(`/items/credits_logs?${new URLSearchParams(qso).toString()}`)
                                     .catch(() => [])
     
                                 if (!logs.length) return response.status(200).send([])

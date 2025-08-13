@@ -268,6 +268,7 @@ const route:BRoute = {
                                 "swapRequestId",
                                 "createdAt",
                                 "reason",
+                                "details",
                             ],
                             limit: request.query.limit || "-1",
                         }
@@ -322,6 +323,20 @@ const route:BRoute = {
                             const fromUserName = l.requesteeId ? idToName.get(l.requesteeId) || null : null
                             const toUserName = idToName.get(l.hostId) || "Unknown"
                             const reason = l.reason || (l.swapRequestId ? "on swap" : "on sign up")
+                            let message: string | null = null
+                            try {
+                                const details = l as any
+                                const parsed = details?.details ? JSON.parse(details.details) : null
+                                if (parsed?.type === "revert") {
+                                    const booked = parsed.bookedNights
+                                    const stayed = parsed.stayedNights
+                                    const reverted = parsed.revertBy
+                                    if (typeof booked === "number" && typeof stayed === "number" && typeof reverted === "number") {
+                                        const guestName = fromUserName || "Guest"
+                                        message = `${guestName} stayed ${stayed} nights and booking ${booked} nights so ${reverted} credit${reverted === 1 ? "" : "s"} is revert to ${guestName}`
+                                    }
+                                }
+                            } catch {}
                             return {
                                 id: idx + 1,
                                 date: formatDate(l.createdAt),
@@ -329,6 +344,7 @@ const route:BRoute = {
                                 toUser: toUserName,
                                 credits: l.creditsChanged,
                                 reason,
+                                message: message || undefined,
                             }
                         })
 

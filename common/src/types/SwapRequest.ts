@@ -12,6 +12,8 @@ export type SwapRequest = {
     notes: string | null,
     lastMessage: string | null,
     nights: string | null,
+    dateFrom: string | null,
+    dateTo: string | null,
 }
 
 export type ChatMessageInput = {

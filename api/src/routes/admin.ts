@@ -64,28 +64,8 @@ const route:BRoute = {
                                     ])
 
                                     if (!wasVerified && willVerify) {
-                                        try {
-                                            // Get current user credits
-                                            const currentUser = await dal.get<User>(`/items/users/${userId}?fields=credits`).catch(() => ({ credits: 0 }))
-                                            const currentCredits = (currentUser as any)?.credits ?? 0
-                                            const newCredits = currentCredits + 5
-                                            
-                                            // Update user credits
-                                            await dal.update<User>(`/items/users/${userId}`, { credits: newCredits })
-                                            
-                                            // log signup/property verification credit
-                                            await dal.create(`/items/credits_logs`, {
-                                                hostId: userId,
-                                                requesteeId: null,
-                                                creditsChanged: 5,
-                                                swapRequestId: null,
-                                                reason: "user verification",
-                                                createdAt: new Date().toISOString()
-                                            })
-                                            console.log(`Created credits log for user verification: ${userId}, credits: ${currentCredits} -> ${newCredits}`)
-                                        } catch (logError) {
-                                            console.error("Failed to update credits or create log:", logError)
-                                        }
+                                        // User verification doesn't give credits - only property verification does
+                                        // No credits update or logging needed here
                                     }
 
                                     await sendAccountVerifiedEmail(updatedUser)

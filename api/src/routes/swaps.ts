@@ -399,34 +399,51 @@ const route: BRoute = {
                                     sr.updatedAt = new Date().toISOString()
                                     up = await dal.update<SwapRequest>(`/items/swap_requests/${swapRequestId}`, { id: sr.id, status: "accepted" })
 
-                                    const nightsRaw = (sr as any).nights
-                                    const nights = Math.max(
-                                        1,
-                                        typeof nightsRaw === "number" ? nightsRaw : (parseInt(nightsRaw || "1", 10) || 1)
-                                    )
+                                    // Calculate credits based on property availability if present, otherwise default to 1
+                                    let creditsToDeduct = 1
+                                    try {
+                                        // Get the property to check its availability
+                                        const property = await dal.get(`/items/properties/${sr.toProperty}?fields=dateDuration,availebleDates`).catch(() => null) as any
+                                        if (property && property.dateDuration) {
+                                            // Try to parse dateDuration as number of days
+                                            const duration = parseInt(property.dateDuration, 10)
+                                            if (!isNaN(duration) && duration > 0) {
+                                                creditsToDeduct = duration
+                                            }
+                                        }
+                                    } catch (propertyError) {
+                                        console.error("Failed to get property availability:", propertyError)
+                                        // Default to 1 credit if property fetch fails
+                                        creditsToDeduct = 1
+                                    }
 
                                     // Host gets credits
                                     try {
                                         const hostUser = await dal.get<User>(`/items/users/${sr.to}?fields=credits`).catch(() => ({ credits: 0 }))
                                         const hostCredits = (hostUser as any)?.credits ?? 0
-                                        await dal.update<User>(`/items/users/${sr.to}`, { credits: hostCredits + nights })
+                                        await dal.update<User>(`/items/users/${sr.to}`, { credits: hostCredits + creditsToDeduct })
                                         
                                         // Requestee loses credits
                                         const requesteeUser = await dal.get<User>(`/items/users/${sr.from}?fields=credits`).catch(() => ({ credits: 0 }))
                                         const requesteeCredits = (requesteeUser as any)?.credits ?? 0
-                                        await dal.update<User>(`/items/users/${sr.from}`, { credits: Math.max(0, requesteeCredits - nights) })
+                                        await dal.update<User>(`/items/users/${sr.from}`, { credits: Math.max(0, requesteeCredits - creditsToDeduct) })
 
                                         // log credit changes (so frontend can show it)
                                         await dal.create(`/items/credits_logs`, {
                                             hostId: sr.to,
                                             requesteeId: sr.from,
-                                            creditsChanged: nights,
+                                            creditsChanged: creditsToDeduct,
                                             swapRequestId: sr.id,
                                             reason: "on swap",
-                                            details: JSON.stringify({ type: "swap_finalize", nights }),
+                                            details: JSON.stringify({ 
+                                                type: "swap_finalize", 
+                                                nights: creditsToDeduct,
+                                                propertyId: sr.toProperty,
+                                                calculatedFromProperty: true
+                                            }),
                                             createdAt: new Date().toISOString()
                                         });
-                                        console.log(`Created swap credits log: host ${sr.to} +${nights}, requestee ${sr.from} -${nights}`)
+                                        console.log(`Created swap credits log: host ${sr.to} +${creditsToDeduct}, requestee ${sr.from} -${creditsToDeduct} (calculated from property availability)`)
                                     } catch (creditError) {
                                         console.error("Failed to update credits or create swap log:", creditError)
                                     }
@@ -476,12 +493,33 @@ const route: BRoute = {
                                 const isAdmin = u.role === "admin" || u.role === "superadmin"
                                 if (!(isHost || isAdmin)) return response.status(401).send({ error: "Unauthorized" })
 
-                                // Determine booked nights on the swap
-                                const nightsRaw = (sr as any).nights
-                                const bookedNights = Math.max(
-                                    1,
-                                    typeof nightsRaw === "number" ? nightsRaw : (parseInt(nightsRaw || "1", 10) || 1)
-                                )
+                                // Determine booked nights on the swap based on property availability
+                                let bookedNights = 1
+                                try {
+                                    // Get the property to check its availability
+                                    const property = await dal.get(`/items/properties/${sr.toProperty}?fields=dateDuration,availebleDates`).catch(() => null) as any
+                                    if (property && property.dateDuration) {
+                                        // Try to parse dateDuration as number of days
+                                        const duration = parseInt(property.dateDuration, 10)
+                                        if (!isNaN(duration) && duration > 0) {
+                                            bookedNights = duration
+                                        }
+                                    } else {
+                                        const nightsRaw = (sr as any).nights
+                                        bookedNights = Math.max(
+                                            1,
+                                            typeof nightsRaw === "number" ? nightsRaw : (parseInt(nightsRaw || "1", 10) || 1)
+                                        )
+                                    }
+                                } catch (propertyError) {
+                                    console.error("Failed to get property availability for revert:", propertyError)
+                                    // Fallback to nights field
+                                    const nightsRaw = (sr as any).nights
+                                    bookedNights = Math.max(
+                                        1,
+                                        typeof nightsRaw === "number" ? nightsRaw : (parseInt(nightsRaw || "1", 10) || 1)
+                                    )
+                                }
 
                                 // Calculate previously reverted credits for this swap
                                 type CreditLog = { creditsChanged: number }
@@ -516,12 +554,18 @@ const route: BRoute = {
                                 }
 
                                 // Perform transfers: host -revertBy, requestee +revertBy
-                                await dal.update<User>(`/items/users/${sr.to}`, {
-                                    credits: { _decrement: revertBy } as any
-                                })
-                                await dal.update<User>(`/items/users/${sr.from}`, {
-                                    credits: { _increment: revertBy } as any
-                                })
+                                try {
+                                    const hostUser = await dal.get<User>(`/items/users/${sr.to}?fields=credits`).catch(() => ({ credits: 0 }))
+                                    const hostCredits = (hostUser as any)?.credits ?? 0
+                                    await dal.update<User>(`/items/users/${sr.to}`, { credits: Math.max(0, hostCredits - revertBy) })
+                                    
+                                    const requesteeUser = await dal.get<User>(`/items/users/${sr.from}?fields=credits`).catch(() => ({ credits: 0 }))
+                                    const requesteeCredits = (requesteeUser as any)?.credits ?? 0
+                                    await dal.update<User>(`/items/users/${sr.from}`, { credits: requesteeCredits + revertBy })
+                                } catch (creditError) {
+                                    console.error("Failed to update credits during revert:", creditError)
+                                    return response.status(500).send({ error: "Failed to update credits" })
+                                }
 
                                 // Log revert as negative on host side
                                 await dal.create(`/items/credits_logs`, {

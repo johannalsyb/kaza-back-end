@@ -42,6 +42,52 @@ export const findUser = async (id: string, user?: User) => {
 
 const route: BRoute = {
     routes: {
+         "all": {
+            get: async (request, response) => {
+                // Only admins should be able to list all users
+                // if (request.user?.role !== "admin") {
+                //     return response.status(401).send({ error: "Unauthorized" })
+                // }
+
+                // Optional: support query filters, pagination, etc.
+                const qs: any = {
+                    "fields[]": [
+                        "id",
+                        "firstName",
+                        "lastName",
+                        "email",
+                        "phone",
+                        "role",
+                        "createdAt",
+                        "credits"
+                    ],
+                    sort: "-createdAt"
+                }
+
+                try {
+                    const users = await dal.find<User>(
+                        `/items/users?${new URLSearchParams(qs).toString()}`
+                    )
+
+                    // Strip sensitive data
+                    const sanitized = users.map(u => ({
+                        id: u.id,
+                        firstName: u.firstName,
+                        lastName: u.lastName,
+                        email: u.email,
+                        phone: u.phone,
+                        role: u.role,
+                        createdAt: u.createdAt,
+                        credits: (u as any).credits ?? 0
+                    }))
+
+                    return response.status(200).send(sanitized)
+                } catch (err: any) {
+                    console.error(err)
+                    return response.status(500).send({ error: err.message || "Server error" })
+                }
+            }
+        },
         ":userId": {
             get: async (request, response) => {
                 const { userId } = request.params

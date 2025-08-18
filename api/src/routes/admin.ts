@@ -259,7 +259,115 @@ const route:BRoute = {
         }
         ,
         "credits": {
+               // New endpoint to send credits to a user
+            // post: async (request, response) => {
+            //     const { userId: toUserId, credits: creditsToSend } = request.body;
+
+            //     // Validate input
+            //     if (!toUserId || !creditsToSend) {
+            //         return response.status(400).send({ error: "Missing 'userId' or 'credits' in request body" });
+            //     }
+
+            //     const parsedCredits = parseInt(creditsToSend);
+
+            //     // Apply the specified validation checks
+            //     if (parsedCredits <= 0) {
+            //         return response.status(400).send({ error: "Credits must be a positive number." });
+            //     }
+            //     if (parsedCredits > 99) {
+            //         return response.status(400).send({ error: "Credits must not be greater than 99." });
+            //     }
+
+            //     try {
+            //         // Fetch the user to update
+            //         const user = await dal.get<User>(`/items/users/${toUserId}`);
+            //         if (!user) {
+            //             return response.status(404).send({ error: "User not found." });
+            //         }
+
+            //         // Calculate the new credit balance
+            //         const currentCredits = user.credits ?? 0;
+            //         const newCredits = currentCredits + parsedCredits;
+
+            //         // Update the user's credits
+            //         await dal.update<User>(`/items/users/${toUserId}`, { credits: newCredits });
+
+            //         // Log the credit transaction
+            //         await dal.create(`/items/credits_logs`, {
+            //             hostId: toUserId,
+            //             requesteeId: request.user?.id, // Assumes the admin user is available on the request
+            //             creditsChanged: parsedCredits,
+            //             swapRequestId: null,
+            //             reason: "manual transfer by admin",
+            //             createdAt: new Date().toISOString()
+            //         });
+
+            //         return response.status(200).send({
+            //             message: `Successfully updated user's credits. New balance: ${newCredits}`,
+            //             updatedUser: { id: toUserId, credits: newCredits }
+            //         });
+
+            //     } catch (e: any) {
+            //         console.error("Failed to update credits:", e);
+            //         return response.status(500).send({ error: e.message });
+            //     }
+            // },
             routes: {
+                 // New endpoint to send credits to a user
+                "send": {
+                    post: async (request, response) => {
+                        const { userId: toUserId, credits: creditsToSend } = request.body;
+
+                        // Validate input
+                        if (!toUserId || !creditsToSend) {
+                            return response.status(400).send({ error: "Missing 'userId' or 'credits' in request body" });
+                        }
+
+                        const parsedCredits = parseInt(creditsToSend);
+
+                        // Apply the specified validation checks
+                        if (parsedCredits <= 0) {
+                            return response.status(400).send({ error: "Credits must be a positive number." });
+                        }
+                        if (parsedCredits > 99) {
+                            return response.status(400).send({ error: "Credits must not be greater than 99." });
+                        }
+
+                        try {
+                            // Fetch the user to update
+                            const user = await dal.get<User>(`/items/users/${toUserId}`);
+                            if (!user) {
+                                return response.status(404).send({ error: "User not found." });
+                            }
+
+                            // Calculate the new credit balance
+                            const currentCredits = user.credits ?? 0;
+                            const newCredits = currentCredits + parsedCredits;
+
+                            // Update the user's credits
+                            await dal.update<User>(`/items/users/${toUserId}`, { credits: newCredits });
+
+                            // Log the credit transaction
+                            await dal.create(`/items/credits_logs`, {
+                                hostId: toUserId,
+                                requesteeId: request.user?.id, // Assumes the admin user is available on the request
+                                creditsChanged: parsedCredits,
+                                swapRequestId: null,
+                                reason: "manual transfer by admin",
+                                createdAt: new Date().toISOString()
+                            });
+
+                            return response.status(200).send({
+                                message: `Successfully updated user's credits. New balance: ${newCredits}`,
+                                updatedUser: { id: toUserId, credits: newCredits }
+                            });
+
+                        } catch (e: any) {
+                            console.error("Failed to update credits:", e);
+                            return response.status(500).send({ error: e.message });
+                        }
+                    }
+                },
                 "logs": {
                     get: async (request, response) => {
                         const qso: any = {

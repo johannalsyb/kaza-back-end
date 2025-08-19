@@ -1,0 +1,4505 @@
+version: 1
+directus: 11.3.5
+vendor: mysql
+collections:
+  - collection: contract
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: contract
+      color: null
+      display_template: null
+      group: null
+      hidden: false
+      icon: null
+      item_duplication_fields: null
+      note: null
+      preview_url: null
+      singleton: false
+      sort: null
+      sort_field: null
+      translations: null
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: contract
+  - collection: contract_details
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: contract_details
+      color: null
+      display_template: null
+      group: null
+      hidden: false
+      icon: null
+      item_duplication_fields: null
+      note: null
+      preview_url: null
+      singleton: false
+      sort: null
+      sort_field: null
+      translations: null
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: contract_details
+  - collection: credits_logs
+    meta: null
+    schema:
+      name: credits_logs
+  - collection: matches
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: matches
+      color: null
+      display_template: null
+      group: null
+      hidden: false
+      icon: null
+      item_duplication_fields: null
+      note: null
+      preview_url: null
+      singleton: false
+      sort: 1
+      sort_field: null
+      translations: null
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: matches
+  - collection: orgs
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: orgs
+      color: null
+      display_template: null
+      group: null
+      hidden: false
+      icon: null
+      item_duplication_fields: null
+      note: null
+      preview_url: null
+      singleton: false
+      sort: null
+      sort_field: null
+      translations: null
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: orgs
+  - collection: properties
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: properties
+      color: null
+      display_template: null
+      group: null
+      hidden: false
+      icon: null
+      item_duplication_fields: null
+      note: null
+      preview_url: null
+      singleton: false
+      sort: 2
+      sort_field: null
+      translations: null
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: properties
+  - collection: property_type
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: property_type
+      color: null
+      display_template: null
+      group: null
+      hidden: true
+      icon: null
+      item_duplication_fields: null
+      note: null
+      preview_url: null
+      singleton: false
+      sort: 7
+      sort_field: null
+      translations: null
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: property_type
+  - collection: swap_requests
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: swap_requests
+      color: null
+      display_template: null
+      group: null
+      hidden: false
+      icon: null
+      item_duplication_fields: null
+      note: null
+      preview_url: null
+      singleton: false
+      sort: null
+      sort_field: null
+      translations: null
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: swap_requests
+  - collection: swaps
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: swaps
+      color: null
+      display_template: null
+      group: null
+      hidden: false
+      icon: null
+      item_duplication_fields: null
+      note: null
+      preview_url: null
+      singleton: false
+      sort: 3
+      sort_field: null
+      translations: null
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: swaps
+  - collection: temp
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: temp
+      color: null
+      display_template: null
+      group: null
+      hidden: false
+      icon: null
+      item_duplication_fields: null
+      note: null
+      preview_url: null
+      singleton: false
+      sort: 4
+      sort_field: null
+      translations: null
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: temp
+  - collection: translations
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: translations
+      color: null
+      display_template: null
+      group: null
+      hidden: false
+      icon: null
+      item_duplication_fields: null
+      note: null
+      preview_url: null
+      singleton: false
+      sort: 5
+      sort_field: null
+      translations: null
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: translations
+  - collection: users
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: users
+      color: null
+      display_template: null
+      group: null
+      hidden: false
+      icon: null
+      item_duplication_fields: null
+      note: null
+      preview_url: null
+      singleton: false
+      sort: 6
+      sort_field: null
+      translations: null
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: users
+fields:
+  - collection: contract
+    field: id
+    type: uuid
+    meta:
+      collection: contract
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      sort: 1
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: contract
+      data_type: char
+      default_value: null
+      max_length: 36
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract
+    field: date_created
+    type: timestamp
+    meta:
+      collection: contract
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: date_created
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      sort: 2
+      special:
+        - date-created
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_created
+      table: contract
+      data_type: timestamp
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract
+    field: date_updated
+    type: timestamp
+    meta:
+      collection: contract
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: date_updated
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      sort: 3
+      special:
+        - date-updated
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_updated
+      table: contract
+      data_type: timestamp
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract
+    field: start_date
+    type: date
+    meta:
+      collection: contract
+      conditions: null
+      display: null
+      display_options: null
+      field: start_date
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: 4
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: start_date
+      table: contract
+      data_type: date
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract
+    field: end_date
+    type: date
+    meta:
+      collection: contract
+      conditions: null
+      display: null
+      display_options: null
+      field: end_date
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: 5
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: end_date
+      table: contract
+      data_type: date
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract
+    field: verification_token
+    type: string
+    meta:
+      collection: contract
+      conditions: null
+      display: null
+      display_options: null
+      field: verification_token
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: 6
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: verification_token
+      table: contract
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract
+    field: verification_expires_at
+    type: dateTime
+    meta:
+      collection: contract
+      conditions: null
+      display: null
+      display_options: null
+      field: verification_expires_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: 7
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: verification_expires_at
+      table: contract
+      data_type: datetime
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract
+    field: is_complete
+    type: boolean
+    meta:
+      collection: contract
+      conditions: null
+      display: null
+      display_options: null
+      field: is_complete
+      group: null
+      hidden: false
+      interface: boolean
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: 8
+      special:
+        - cast-boolean
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: is_complete
+      table: contract
+      data_type: boolean
+      default_value: null
+      max_length: null
+      numeric_precision: 3
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract
+    field: match_score
+    type: integer
+    meta:
+      collection: contract
+      conditions: null
+      display: null
+      display_options: null
+      field: match_score
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        max: 100
+        min: 1
+      readonly: false
+      required: false
+      sort: 9
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: match_score
+      table: contract
+      data_type: int
+      default_value: null
+      max_length: null
+      numeric_precision: 10
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract_details
+    field: id
+    type: uuid
+    meta:
+      collection: contract_details
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      sort: 1
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: contract_details
+      data_type: char
+      default_value: null
+      max_length: 36
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract_details
+    field: date_created
+    type: timestamp
+    meta:
+      collection: contract_details
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: date_created
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      sort: 2
+      special:
+        - date-created
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_created
+      table: contract_details
+      data_type: timestamp
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract_details
+    field: date_updated
+    type: timestamp
+    meta:
+      collection: contract_details
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: date_updated
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      sort: 3
+      special:
+        - date-updated
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_updated
+      table: contract_details
+      data_type: timestamp
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract_details
+    field: contract_id
+    type: string
+    meta:
+      collection: contract_details
+      conditions: null
+      display: null
+      display_options: null
+      field: contract_id
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{id}}'
+      readonly: false
+      required: false
+      sort: 4
+      special:
+        - m2o
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: contract_id
+      table: contract_details
+      data_type: char
+      default_value: null
+      max_length: 36
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: contract
+      foreign_key_column: id
+  - collection: contract_details
+    field: role
+    type: string
+    meta:
+      collection: contract_details
+      conditions: null
+      display: null
+      display_options: null
+      field: role
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Host
+            value: host
+          - text: Guest
+            value: guest
+      readonly: false
+      required: false
+      sort: 5
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: role
+      table: contract_details
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract_details
+    field: name
+    type: string
+    meta:
+      collection: contract_details
+      conditions: null
+      display: null
+      display_options: null
+      field: name
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: 6
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: name
+      table: contract_details
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract_details
+    field: surname
+    type: string
+    meta:
+      collection: contract_details
+      conditions: null
+      display: null
+      display_options: null
+      field: surname
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: 7
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: surname
+      table: contract_details
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract_details
+    field: email
+    type: string
+    meta:
+      collection: contract_details
+      conditions: null
+      display: null
+      display_options: null
+      field: email
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: 8
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: email
+      table: contract_details
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract_details
+    field: phone
+    type: text
+    meta:
+      collection: contract_details
+      conditions: null
+      display: null
+      display_options: null
+      field: phone
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: 9
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: phone
+      table: contract_details
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract_details
+    field: cleanliness
+    type: text
+    meta:
+      collection: contract_details
+      conditions: null
+      display: null
+      display_options: null
+      field: cleanliness
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: 10
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: cleanliness
+      table: contract_details
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract_details
+    field: slider_score
+    type: integer
+    meta:
+      collection: contract_details
+      conditions: null
+      display: null
+      display_options: null
+      field: slider_score
+      group: null
+      hidden: false
+      interface: slider
+      note: null
+      options:
+        maxValue: 100
+        minValue: 1
+      readonly: false
+      required: false
+      sort: 11
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: slider_score
+      table: contract_details
+      data_type: int
+      default_value: null
+      max_length: null
+      numeric_precision: 10
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract_details
+    field: expectations
+    type: json
+    meta:
+      collection: contract_details
+      conditions: null
+      display: null
+      display_options: null
+      field: expectations
+      group: null
+      hidden: false
+      interface: select-multiple-checkbox
+      note: null
+      options:
+        choices:
+          - text: Trash
+            value: trash
+      readonly: false
+      required: false
+      sort: 12
+      special:
+        - cast-json
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: expectations
+      table: contract_details
+      data_type: longtext
+      default_value: null
+      max_length: 4294967295
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: contract_details
+    field: rules
+    type: json
+    meta:
+      collection: contract_details
+      conditions: null
+      display: null
+      display_options: null
+      field: rules
+      group: null
+      hidden: false
+      interface: select-multiple-checkbox
+      note: null
+      options:
+        choices:
+          - text: Are you travelling with a pet?
+            value: petsAllowed
+          - text: Invite people over?
+            value: guestsAllowed
+          - text: Are you smoking
+            value: smokingAllowed
+      readonly: false
+      required: false
+      sort: 13
+      special:
+        - cast-json
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: rules
+      table: contract_details
+      data_type: longtext
+      default_value: null
+      max_length: 4294967295
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: credits_logs
+    field: swapRequestId
+    type: string
+    meta: null
+    schema:
+      name: swapRequestId
+      table: credits_logs
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: swap_requests
+      foreign_key_column: id
+  - collection: credits_logs
+    field: hostId
+    type: string
+    meta: null
+    schema:
+      name: hostId
+      table: credits_logs
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: users
+      foreign_key_column: id
+  - collection: credits_logs
+    field: requesteeId
+    type: string
+    meta: null
+    schema:
+      name: requesteeId
+      table: credits_logs
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: users
+      foreign_key_column: id
+  - collection: credits_logs
+    field: createdAt
+    type: string
+    meta: null
+    schema:
+      name: createdAt
+      table: credits_logs
+      data_type: varchar
+      default_value: date_format(utc_timestamp(3),'%Y-%m-%dT%TZ')
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: credits_logs
+    field: id
+    type: string
+    meta: null
+    schema:
+      name: id
+      table: credits_logs
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: credits_logs
+    field: creditsChanged
+    type: integer
+    meta: null
+    schema:
+      name: creditsChanged
+      table: credits_logs
+      data_type: int
+      default_value: null
+      max_length: null
+      numeric_precision: 10
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: credits_logs
+    field: reason
+    type: string
+    meta: null
+    schema:
+      name: reason
+      table: credits_logs
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directus_permissions
+    field: role
+    type: string
+    meta: null
+    schema:
+      name: role
+      table: directus_permissions
+      data_type: char
+      default_value: null
+      max_length: 36
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directus_roles
+    field: ip_access
+    type: text
+    meta: null
+    schema:
+      name: ip_access
+      table: directus_roles
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directus_roles
+    field: admin_access
+    type: boolean
+    meta: null
+    schema:
+      name: admin_access
+      table: directus_roles
+      data_type: boolean
+      default_value: true
+      max_length: null
+      numeric_precision: 3
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directus_roles
+    field: app_access
+    type: boolean
+    meta: null
+    schema:
+      name: app_access
+      table: directus_roles
+      data_type: boolean
+      default_value: true
+      max_length: null
+      numeric_precision: 3
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: matches
+    field: id
+    type: string
+    meta:
+      collection: matches
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: matches
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: matches
+    field: property
+    type: string
+    meta:
+      collection: matches
+      conditions: null
+      display: null
+      display_options: null
+      field: property
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: property
+      table: matches
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: properties
+      foreign_key_column: id
+  - collection: matches
+    field: user
+    type: string
+    meta: null
+    schema:
+      name: user
+      table: matches
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: users
+      foreign_key_column: id
+  - collection: matches
+    field: notes
+    type: text
+    meta: null
+    schema:
+      name: notes
+      table: matches
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: matches
+    field: createdAt
+    type: string
+    meta: null
+    schema:
+      name: createdAt
+      table: matches
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: matches
+    field: updatedAt
+    type: string
+    meta: null
+    schema:
+      name: updatedAt
+      table: matches
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: matches
+    field: lastNotification
+    type: string
+    meta: null
+    schema:
+      name: lastNotification
+      table: matches
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: matches
+    field: expired
+    type: boolean
+    meta: null
+    schema:
+      name: expired
+      table: matches
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: 3
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: matches
+    field: deleted
+    type: boolean
+    meta: null
+    schema:
+      name: deleted
+      table: matches
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: 3
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: matches
+    field: seen
+    type: boolean
+    meta: null
+    schema:
+      name: seen
+      table: matches
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: 3
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orgs
+    field: owner
+    type: string
+    meta: null
+    schema:
+      name: owner
+      table: orgs
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: users
+      foreign_key_column: id
+  - collection: orgs
+    field: id
+    type: string
+    meta: null
+    schema:
+      name: id
+      table: orgs
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orgs
+    field: name
+    type: string
+    meta: null
+    schema:
+      name: name
+      table: orgs
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orgs
+    field: createdAt
+    type: string
+    meta: null
+    schema:
+      name: createdAt
+      table: orgs
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orgs
+    field: updatedAt
+    type: string
+    meta: null
+    schema:
+      name: updatedAt
+      table: orgs
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: description
+    type: text
+    meta:
+      collection: properties
+      conditions: null
+      display: null
+      display_options: null
+      field: description
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: description
+      table: properties
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: primaryImage
+    type: text
+    meta:
+      collection: properties
+      conditions: null
+      display: null
+      display_options: null
+      field: primaryImage
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: primaryImage
+      table: properties
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: images
+    type: text
+    meta:
+      collection: properties
+      conditions: null
+      display: null
+      display_options: null
+      field: images
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: images
+      table: properties
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: amenities
+    type: text
+    meta:
+      collection: properties
+      conditions: null
+      display: null
+      display_options: null
+      field: amenities
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: amenities
+      table: properties
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: createdAt
+    type: string
+    meta:
+      collection: properties
+      conditions: null
+      display: null
+      display_options: null
+      field: createdAt
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: createdAt
+      table: properties
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: createdDate
+    type: date
+    meta:
+      collection: properties
+      conditions: null
+      display: null
+      display_options: null
+      field: createdDate
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: createdDate
+      table: properties
+      data_type: date
+      default_value: curdate()
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: updatedAt
+    type: string
+    meta:
+      collection: properties
+      conditions: null
+      display: null
+      display_options: null
+      field: updatedAt
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: updatedAt
+      table: properties
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: owner
+    type: string
+    meta: null
+    schema:
+      name: owner
+      table: properties
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: users
+      foreign_key_column: id
+  - collection: properties
+    field: type
+    type: string
+    meta: null
+    schema:
+      name: type
+      table: properties
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: property_type
+      foreign_key_column: id
+  - collection: properties
+    field: id
+    type: string
+    meta: null
+    schema:
+      name: id
+      table: properties
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: name
+    type: string
+    meta: null
+    schema:
+      name: name
+      table: properties
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: attractiveness
+    type: integer
+    meta: null
+    schema:
+      name: attractiveness
+      table: properties
+      data_type: int
+      default_value: null
+      max_length: null
+      numeric_precision: 10
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: dateDuration
+    type: string
+    meta: null
+    schema:
+      name: dateDuration
+      table: properties
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: datePreference
+    type: string
+    meta: null
+    schema:
+      name: datePreference
+      table: properties
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: dateRanges
+    type: text
+    meta: null
+    schema:
+      name: dateRanges
+      table: properties
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: flatmates
+    type: integer
+    meta: null
+    schema:
+      name: flatmates
+      table: properties
+      data_type: int
+      default_value: 0
+      max_length: null
+      numeric_precision: 10
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: address
+    type: string
+    meta: null
+    schema:
+      name: address
+      table: properties
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: country
+    type: string
+    meta: null
+    schema:
+      name: country
+      table: properties
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: region
+    type: string
+    meta: null
+    schema:
+      name: region
+      table: properties
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: city
+    type: string
+    meta: null
+    schema:
+      name: city
+      table: properties
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: lat
+    type: float
+    meta: null
+    schema:
+      name: lat
+      table: properties
+      data_type: double
+      default_value: null
+      max_length: null
+      numeric_precision: 22
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: lon
+    type: float
+    meta: null
+    schema:
+      name: lon
+      table: properties
+      data_type: double
+      default_value: null
+      max_length: null
+      numeric_precision: 22
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: approxLat
+    type: float
+    meta: null
+    schema:
+      name: approxLat
+      table: properties
+      data_type: double
+      default_value: null
+      max_length: null
+      numeric_precision: 22
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: approxLon
+    type: float
+    meta: null
+    schema:
+      name: approxLon
+      table: properties
+      data_type: double
+      default_value: null
+      max_length: null
+      numeric_precision: 22
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: bathrooms
+    type: integer
+    meta: null
+    schema:
+      name: bathrooms
+      table: properties
+      data_type: int
+      default_value: 1
+      max_length: null
+      numeric_precision: 10
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: bedrooms
+    type: integer
+    meta: null
+    schema:
+      name: bedrooms
+      table: properties
+      data_type: int
+      default_value: 1
+      max_length: null
+      numeric_precision: 10
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: beds
+    type: integer
+    meta: null
+    schema:
+      name: beds
+      table: properties
+      data_type: int
+      default_value: 1
+      max_length: null
+      numeric_precision: 10
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: pets
+    type: boolean
+    meta: null
+    schema:
+      name: pets
+      table: properties
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: 3
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: private
+    type: boolean
+    meta: null
+    schema:
+      name: private
+      table: properties
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: 3
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: verified
+    type: boolean
+    meta: null
+    schema:
+      name: verified
+      table: properties
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: 3
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: sizeM2
+    type: integer
+    meta: null
+    schema:
+      name: sizeM2
+      table: properties
+      data_type: int
+      default_value: 0
+      max_length: null
+      numeric_precision: 10
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: smokingAllowed
+    type: boolean
+    meta: null
+    schema:
+      name: smokingAllowed
+      table: properties
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: 3
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: childrenAllowed
+    type: boolean
+    meta: null
+    schema:
+      name: childrenAllowed
+      table: properties
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: 3
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: bedArrangements
+    type: string
+    meta: null
+    schema:
+      name: bedArrangements
+      table: properties
+      data_type: varchar
+      default_value: '[]'
+      max_length: 1000
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: property_type
+    field: id
+    type: string
+    meta: null
+    schema:
+      name: id
+      table: property_type
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: property_type
+    field: createdAt
+    type: string
+    meta: null
+    schema:
+      name: createdAt
+      table: property_type
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: property_type
+    field: updatedAt
+    type: string
+    meta: null
+    schema:
+      name: updatedAt
+      table: property_type
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: swap_requests
+    field: from
+    type: string
+    meta: null
+    schema:
+      name: from
+      table: swap_requests
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: users
+      foreign_key_column: id
+  - collection: swap_requests
+    field: to
+    type: string
+    meta: null
+    schema:
+      name: to
+      table: swap_requests
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: users
+      foreign_key_column: id
+  - collection: swap_requests
+    field: fromProperty
+    type: string
+    meta: null
+    schema:
+      name: fromProperty
+      table: swap_requests
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: properties
+      foreign_key_column: id
+  - collection: swap_requests
+    field: toProperty
+    type: string
+    meta: null
+    schema:
+      name: toProperty
+      table: swap_requests
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: properties
+      foreign_key_column: id
+  - collection: swap_requests
+    field: id
+    type: string
+    meta: null
+    schema:
+      name: id
+      table: swap_requests
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: swap_requests
+    field: fromAccepted
+    type: string
+    meta: null
+    schema:
+      name: fromAccepted
+      table: swap_requests
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: swap_requests
+    field: toAccepted
+    type: string
+    meta: null
+    schema:
+      name: toAccepted
+      table: swap_requests
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: swap_requests
+    field: createdAt
+    type: string
+    meta: null
+    schema:
+      name: createdAt
+      table: swap_requests
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: swap_requests
+    field: updatedAt
+    type: string
+    meta: null
+    schema:
+      name: updatedAt
+      table: swap_requests
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: swap_requests
+    field: status
+    type: string
+    meta: null
+    schema:
+      name: status
+      table: swap_requests
+      data_type: varchar
+      default_value: pending
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: swap_requests
+    field: notes
+    type: text
+    meta: null
+    schema:
+      name: notes
+      table: swap_requests
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: swap_requests
+    field: lastMessage
+    type: text
+    meta: null
+    schema:
+      name: lastMessage
+      table: swap_requests
+      data_type: longtext
+      default_value: null
+      max_length: 4294967295
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: swaps
+    field: u2from
+    type: string
+    meta:
+      collection: swaps
+      conditions: null
+      display: null
+      display_options: null
+      field: u2from
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: u2from
+      table: swaps
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: swaps
+    field: createdAt
+    type: string
+    meta:
+      collection: swaps
+      conditions: null
+      display: null
+      display_options: null
+      field: createdAt
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: createdAt
+      table: swaps
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: swaps
+    field: u1from
+    type: string
+    meta:
+      collection: swaps
+      conditions: null
+      display: null
+      display_options: null
+      field: u1from
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: u1from
+      table: swaps
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: swaps
+    field: id
+    type: string
+    meta:
+      collection: swaps
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: swaps
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: swaps
+    field: request
+    type: string
+    meta: null
+    schema:
+      name: request
+      table: swaps
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: swap_requests
+      foreign_key_column: id
+  - collection: swaps
+    field: u1to
+    type: string
+    meta: null
+    schema:
+      name: u1to
+      table: swaps
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: swaps
+    field: u2to
+    type: string
+    meta: null
+    schema:
+      name: u2to
+      table: swaps
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: swaps
+    field: notes
+    type: text
+    meta: null
+    schema:
+      name: notes
+      table: swaps
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: swaps
+    field: updatedAt
+    type: string
+    meta: null
+    schema:
+      name: updatedAt
+      table: swaps
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: temp
+    field: id
+    type: string
+    meta: null
+    schema:
+      name: id
+      table: temp
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: temp
+    field: type
+    type: string
+    meta: null
+    schema:
+      name: type
+      table: temp
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: temp
+    field: expiry
+    type: bigInteger
+    meta: null
+    schema:
+      name: expiry
+      table: temp
+      data_type: bigint
+      default_value: null
+      max_length: null
+      numeric_precision: 19
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: temp
+    field: data
+    type: text
+    meta: null
+    schema:
+      name: data
+      table: temp
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: temp
+    field: createdAt
+    type: string
+    meta: null
+    schema:
+      name: createdAt
+      table: temp
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: temp
+    field: updatedAt
+    type: string
+    meta: null
+    schema:
+      name: updatedAt
+      table: temp
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: translations
+    field: id
+    type: string
+    meta: null
+    schema:
+      name: id
+      table: translations
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: translations
+    field: createdAt
+    type: string
+    meta: null
+    schema:
+      name: createdAt
+      table: translations
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: translations
+    field: updatedAt
+    type: string
+    meta: null
+    schema:
+      name: updatedAt
+      table: translations
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: translations
+    field: english
+    type: text
+    meta: null
+    schema:
+      name: english
+      table: translations
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: translations
+    field: french
+    type: text
+    meta: null
+    schema:
+      name: french
+      table: translations
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: translations
+    field: spanish
+    type: text
+    meta: null
+    schema:
+      name: spanish
+      table: translations
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: translations
+    field: portuguese
+    type: text
+    meta: null
+    schema:
+      name: portuguese
+      table: translations
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: translations
+    field: italian
+    type: text
+    meta: null
+    schema:
+      name: italian
+      table: translations
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: translations
+    field: enabled
+    type: boolean
+    meta: null
+    schema:
+      name: enabled
+      table: translations
+      data_type: boolean
+      default_value: true
+      max_length: null
+      numeric_precision: 3
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: orgs
+    type: text
+    meta:
+      collection: users
+      conditions: null
+      display: null
+      display_options: null
+      field: orgs
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: orgs
+      table: users
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: images
+    type: text
+    meta:
+      collection: users
+      conditions: null
+      display: null
+      display_options: null
+      field: images
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: images
+      table: users
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: about
+    type: text
+    meta:
+      collection: users
+      conditions: null
+      display: null
+      display_options: null
+      field: about
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: about
+      table: users
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: primaryImage
+    type: text
+    meta:
+      collection: users
+      conditions: null
+      display: null
+      display_options: null
+      field: primaryImage
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: primaryImage
+      table: users
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: password
+    type: string
+    meta:
+      collection: users
+      conditions: null
+      display: null
+      display_options: null
+      field: password
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: password
+      table: users
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: phone
+    type: string
+    meta:
+      collection: users
+      conditions: null
+      display: null
+      display_options: null
+      field: phone
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: phone
+      table: users
+      data_type: varchar
+      default_value: null
+      max_length: 50
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: updatedAt
+    type: string
+    meta:
+      collection: users
+      conditions: null
+      display: null
+      display_options: null
+      field: updatedAt
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: updatedAt
+      table: users
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: firstName
+    type: string
+    meta:
+      collection: users
+      conditions: null
+      display: null
+      display_options: null
+      field: firstName
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: firstName
+      table: users
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: createdAt
+    type: string
+    meta:
+      collection: users
+      conditions: null
+      display: null
+      display_options: null
+      field: createdAt
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: createdAt
+      table: users
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: dateFrom
+    type: bigInteger
+    meta:
+      collection: users
+      conditions: null
+      display: null
+      display_options: null
+      field: dateFrom
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: dateFrom
+      table: users
+      data_type: bigint
+      default_value: null
+      max_length: null
+      numeric_precision: 19
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: dateTo
+    type: bigInteger
+    meta:
+      collection: users
+      conditions: null
+      display: null
+      display_options: null
+      field: dateTo
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: dateTo
+      table: users
+      data_type: bigint
+      default_value: null
+      max_length: null
+      numeric_precision: 19
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: role
+    type: string
+    meta: null
+    schema:
+      name: role
+      table: users
+      data_type: varchar
+      default_value: user
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: id
+    type: string
+    meta: null
+    schema:
+      name: id
+      table: users
+      data_type: varchar
+      default_value: null
+      max_length: 100
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: email
+    type: string
+    meta: null
+    schema:
+      name: email
+      table: users
+      data_type: varchar
+      default_value: null
+      max_length: 50
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: emailVerified
+    type: boolean
+    meta: null
+    schema:
+      name: emailVerified
+      table: users
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: 3
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: phoneVerified
+    type: boolean
+    meta: null
+    schema:
+      name: phoneVerified
+      table: users
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: 3
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: lastName
+    type: string
+    meta: null
+    schema:
+      name: lastName
+      table: users
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: verified
+    type: boolean
+    meta: null
+    schema:
+      name: verified
+      table: users
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: 3
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: job
+    type: string
+    meta: null
+    schema:
+      name: job
+      table: users
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: hobby
+    type: string
+    meta: null
+    schema:
+      name: hobby
+      table: users
+      data_type: varchar
+      default_value: ''
+      max_length: 3000
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: socialMedia
+    type: string
+    meta: null
+    schema:
+      name: socialMedia
+      table: users
+      data_type: varchar
+      default_value: ''
+      max_length: 3000
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: ambassadorCode
+    type: string
+    meta: null
+    schema:
+      name: ambassadorCode
+      table: users
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: gender
+    type: string
+    meta: null
+    schema:
+      name: gender
+      table: users
+      data_type: varchar
+      default_value: ''
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: commsPref
+    type: string
+    meta: null
+    schema:
+      name: commsPref
+      table: users
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: languagePref
+    type: string
+    meta: null
+    schema:
+      name: languagePref
+      table: users
+      data_type: varchar
+      default_value: english
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: pushToken
+    type: string
+    meta: null
+    schema:
+      name: pushToken
+      table: users
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: swapLocations
+    type: text
+    meta: null
+    schema:
+      name: swapLocations
+      table: users
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: favourites
+    type: string
+    meta: null
+    schema:
+      name: favourites
+      table: users
+      data_type: varchar
+      default_value: null
+      max_length: 3000
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: onboarding
+    type: text
+    meta: null
+    schema:
+      name: onboarding
+      table: users
+      data_type: longtext
+      default_value: null
+      max_length: 4294967295
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: payment
+    type: string
+    meta: null
+    schema:
+      name: payment
+      table: users
+      data_type: varchar
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
+    field: credits
+    type: integer
+    meta: null
+    schema:
+      name: credits
+      table: users
+      data_type: int
+      default_value: 5
+      max_length: null
+      numeric_precision: 10
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+relations:
+  - collection: contract_details
+    field: contract_id
+    related_collection: contract
+    meta:
+      junction_field: null
+      many_collection: contract_details
+      many_field: contract_id
+      one_allowed_collections: null
+      one_collection: contract
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: contract_details
+      column: contract_id
+      foreign_key_table: contract
+      foreign_key_column: id
+      constraint_name: contract_details_contract_id_foreign
+      on_update: RESTRICT
+      on_delete: SET NULL
+  - collection: credits_logs
+    field: hostId
+    related_collection: users
+    meta: null
+    schema:
+      table: credits_logs
+      column: hostId
+      foreign_key_table: users
+      foreign_key_column: id
+      constraint_name: fk_credits_logs_host
+      on_update: RESTRICT
+      on_delete: RESTRICT
+  - collection: credits_logs
+    field: requesteeId
+    related_collection: users
+    meta: null
+    schema:
+      table: credits_logs
+      column: requesteeId
+      foreign_key_table: users
+      foreign_key_column: id
+      constraint_name: fk_credits_logs_requestee
+      on_update: RESTRICT
+      on_delete: RESTRICT
+  - collection: credits_logs
+    field: swapRequestId
+    related_collection: swap_requests
+    meta: null
+    schema:
+      table: credits_logs
+      column: swapRequestId
+      foreign_key_table: swap_requests
+      foreign_key_column: id
+      constraint_name: fk_credits_logs_swap_request
+      on_update: RESTRICT
+      on_delete: RESTRICT
+  - collection: matches
+    field: property
+    related_collection: properties
+    meta: null
+    schema:
+      table: matches
+      column: property
+      foreign_key_table: properties
+      foreign_key_column: id
+      constraint_name: fk_prop
+      on_update: RESTRICT
+      on_delete: RESTRICT
+  - collection: matches
+    field: user
+    related_collection: users
+    meta: null
+    schema:
+      table: matches
+      column: user
+      foreign_key_table: users
+      foreign_key_column: id
+      constraint_name: fk_user
+      on_update: RESTRICT
+      on_delete: RESTRICT
+  - collection: orgs
+    field: owner
+    related_collection: users
+    meta: null
+    schema:
+      table: orgs
+      column: owner
+      foreign_key_table: users
+      foreign_key_column: id
+      constraint_name: fk_creator
+      on_update: RESTRICT
+      on_delete: RESTRICT
+  - collection: properties
+    field: owner
+    related_collection: users
+    meta: null
+    schema:
+      table: properties
+      column: owner
+      foreign_key_table: users
+      foreign_key_column: id
+      constraint_name: fk_owner
+      on_update: RESTRICT
+      on_delete: RESTRICT
+  - collection: properties
+    field: type
+    related_collection: property_type
+    meta: null
+    schema:
+      table: properties
+      column: type
+      foreign_key_table: property_type
+      foreign_key_column: id
+      constraint_name: fk_type
+      on_update: RESTRICT
+      on_delete: RESTRICT
+  - collection: swap_requests
+    field: from
+    related_collection: users
+    meta: null
+    schema:
+      table: swap_requests
+      column: from
+      foreign_key_table: users
+      foreign_key_column: id
+      constraint_name: fk_from
+      on_update: RESTRICT
+      on_delete: RESTRICT
+  - collection: swap_requests
+    field: fromProperty
+    related_collection: properties
+    meta: null
+    schema:
+      table: swap_requests
+      column: fromProperty
+      foreign_key_table: properties
+      foreign_key_column: id
+      constraint_name: fk_from_property
+      on_update: RESTRICT
+      on_delete: RESTRICT
+  - collection: swap_requests
+    field: to
+    related_collection: users
+    meta: null
+    schema:
+      table: swap_requests
+      column: to
+      foreign_key_table: users
+      foreign_key_column: id
+      constraint_name: fk_to
+      on_update: RESTRICT
+      on_delete: RESTRICT
+  - collection: swap_requests
+    field: toProperty
+    related_collection: properties
+    meta: null
+    schema:
+      table: swap_requests
+      column: toProperty
+      foreign_key_table: properties
+      foreign_key_column: id
+      constraint_name: fk_to_property
+      on_update: RESTRICT
+      on_delete: RESTRICT
+  - collection: swaps
+    field: request
+    related_collection: swap_requests
+    meta: null
+    schema:
+      table: swaps
+      column: request
+      foreign_key_table: swap_requests
+      foreign_key_column: id
+      constraint_name: fk_request
+      on_update: RESTRICT
+      on_delete: RESTRICT

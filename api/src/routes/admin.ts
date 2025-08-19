@@ -275,9 +275,6 @@ const route:BRoute = {
                         if (parsedCredits <= 0) {
                             return response.status(400).send({ error: "Credits must be a positive number." });
                         }
-                        if (parsedCredits > 99) {
-                            return response.status(400).send({ error: "Credits must not be greater than 99." });
-                        }
 
                         try {
                             // Fetch the user to update
@@ -289,6 +286,11 @@ const route:BRoute = {
                             // Calculate the new credit balance
                             const currentCredits = user.credits ?? 0;
                             const newCredits = currentCredits + parsedCredits;
+
+                            // Prevent totals over 99
+                            if (newCredits > 99) {
+                                return response.status(400).send({ error: "Total credits cannot exceed 99." });
+                            }
 
                             // Update the user's credits
                             await dal.update<User>(`/items/users/${toUserId}`, { credits: newCredits });

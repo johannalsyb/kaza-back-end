@@ -1310,6 +1310,27 @@ fields:
       has_auto_increment: false
       foreign_key_table: null
       foreign_key_column: null
+  - collection: credits_logs
+    field: details
+    type: text
+    meta: null
+    schema:
+      name: details
+      table: credits_logs
+      data_type: text
+      default_value: null
+      max_length: 65535
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: directus_permissions
     field: role
     type: string
@@ -2574,6 +2595,48 @@ fields:
       data_type: varchar
       default_value: '[]'
       max_length: 1000
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: availabilitySlots
+    type: string
+    meta: null
+    schema:
+      name: availabilitySlots
+      table: properties
+      data_type: varchar
+      default_value: '[]'
+      max_length: 3000
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: properties
+    field: availebleDates
+    type: text
+    meta: null
+    schema:
+      name: availebleDates
+      table: properties
+      data_type: longtext
+      default_value: json_array()
+      max_length: 4294967295
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
@@ -3906,6 +3969,46 @@ fields:
       foreign_key_table: null
       foreign_key_column: null
   - collection: users
+    field: credits
+    type: integer
+    meta:
+      collection: users
+      conditions: null
+      display: null
+      display_options: null
+      field: credits
+      group: null
+      hidden: false
+      interface: numeric
+      note: null
+      options:
+        min: 0
+      readonly: false
+      required: false
+      sort: null
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: credits
+      table: users
+      data_type: int
+      default_value: 5
+      max_length: null
+      numeric_precision: 10
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: users
     field: role
     type: string
     meta: null
@@ -4296,27 +4399,6 @@ fields:
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
-      is_unique: false
-      is_indexed: false
-      is_primary_key: false
-      is_generated: false
-      generation_expression: null
-      has_auto_increment: false
-      foreign_key_table: null
-      foreign_key_column: null
-  - collection: users
-    field: credits
-    type: integer
-    meta: null
-    schema:
-      name: credits
-      table: users
-      data_type: int
-      default_value: 5
-      max_length: null
-      numeric_precision: 10
-      numeric_scale: 0
-      is_nullable: false
       is_unique: false
       is_indexed: false
       is_primary_key: false

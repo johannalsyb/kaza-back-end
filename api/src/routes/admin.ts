@@ -2,7 +2,7 @@ import { dal } from '../dal'
 import { BRoute } from '../types'
 import auth from '../middlewares/auth'
 import User from '../../../common/src/types/User'
-import {findIncompleteProfiles, markIncompleteProfiles, resetPasswordRequest, sendAccountVerifiedEmail, sendPasswordResetEmail} from '../models/user'
+import { findIncompleteProfiles, markIncompleteProfiles, resetPasswordRequest, sendAccountVerifiedEmail, sendPasswordResetEmail } from '../models/user'
 import { getAppUrl } from '../utils'
 import admin from '../middlewares/admin'
 import Property from '../../../common/src/types/Property'
@@ -18,7 +18,7 @@ import sendEmail from "../services/email"
 import { rebuildMatches } from '../models/match'
 import { debug } from 'console'
 
-const route:BRoute = {
+const route: BRoute = {
     routes: {
         "users": {
             get: async (request, response) => {
@@ -29,28 +29,28 @@ const route:BRoute = {
             routes: {
                 ":userId": {
                     get: async (request, response) => {
-                        const {userId} = request.params
+                        const { userId } = request.params
                         const user = await dal.get<User>(`/items/users/${userId}?${new URLSearchParams(request.query || {}).toString()}`)
-                        if(!user) return response.status(404).send({error: "Not found"})
+                        if (!user) return response.status(404).send({ error: "Not found" })
                         response.status(200).send<User>(user)
                     },
                     delete: async (request, response) => {
-                        const {userId} = request.params
+                        const { userId } = request.params
                         dal.delete(`/items/users/${userId}`)
-                        .then(() => response.status(200).send({}))
-                        .catch((e:any) => response.status(500).send({error: e.message}))
+                            .then(() => response.status(200).send({}))
+                            .catch((e: any) => response.status(500).send({ error: e.message }))
                     },
                     routes: {
                         "verify": {
                             get: async (request, response) => {
-                                let {userId} = request.params
-                                if(!request.query.verify || (request.query.verify !== "true" && request.query.verify !== "false"))
-                                return response.status(400).send({error: "Invalid request"})
-                                
-                                const url = `/items/properties?${new URLSearchParams({filter: JSON.stringify({owner: userId}), sort: "-createdAt"}).toString()}`
+                                let { userId } = request.params
+                                if (!request.query.verify || (request.query.verify !== "true" && request.query.verify !== "false"))
+                                    return response.status(400).send({ error: "Invalid request" })
+
+                                const url = `/items/properties?${new URLSearchParams({ filter: JSON.stringify({ owner: userId }), sort: "-createdAt" }).toString()}`
                                 const props = await dal.find<Property>(url)
-                                if(!props.length) {
-                                    return response.status(400).send({error: "No property for this user"})
+                                if (!props.length) {
+                                    return response.status(400).send({ error: "No property for this user" })
                                 }
 
                                 try {
@@ -59,8 +59,8 @@ const route:BRoute = {
                                     const willVerify = request.query.verify === "true"
 
                                     const [updatedProp, updatedUser] = await Promise.all([
-                                        dal.update<Property>(`/items/properties/${property.id}`, {verified: willVerify, private: !willVerify}),
-                                        dal.update<User>(`/items/users/${userId}`, {verified: willVerify})
+                                        dal.update<Property>(`/items/properties/${property.id}`, { verified: willVerify, private: !willVerify }),
+                                        dal.update<User>(`/items/users/${userId}`, { verified: willVerify })
                                     ])
 
                                     if (!wasVerified && willVerify) {
@@ -70,80 +70,80 @@ const route:BRoute = {
 
                                     await sendAccountVerifiedEmail(updatedUser)
                                     response.status(200).send<User>(updatedUser)
-                                } catch(e:any) {
-                                    response.status(500).send({error: e.message})
+                                } catch (e: any) {
+                                    response.status(500).send({ error: e.message })
                                 }
                             }
                         },
                         "resetPassword": {
                             get: async (request, response) => {
-                                let {userId} = request.params
+                                let { userId } = request.params
                                 const user = await dal.get<User>(`/items/users/${userId}`)
-                                if(!user) return response.status(404).send({error: "Not found"})
+                                if (!user) return response.status(404).send({ error: "Not found" })
                                 const host = getAppUrl(request)
                                 sendPasswordResetEmail(user, host)
-                                .then(url => response.status(200).send({url}))
-                                .catch((e:any) => response.status(500).send({error: e.message}))
+                                    .then(url => response.status(200).send({ url }))
+                                    .catch((e: any) => response.status(500).send({ error: e.message }))
                             }
                         },
                     }
                 },
                 "incomplete": {
                     get: async (request, response) => {
-                        const {action} = request.query
-                        if(action === "mark") {
+                        const { action } = request.query
+                        if (action === "mark") {
                             const users = await markIncompleteProfiles()
                             response.status(200).send(users)
-                        } else if(action === "send") {
+                        } else if (action === "send") {
                             const u = await checkIncompleteProfiles()
                             response.status(200).send(u)
-                        } else if(action === "find") {
+                        } else if (action === "find") {
                             const u = await findIncompleteProfiles()
                             response.status(200).send(u)
                         } else {
-                            response.status(400).send({error: "Invalid request"})
+                            response.status(400).send({ error: "Invalid request" })
 
                         }
                     }
                 },
                 "importedfrombubble": {
                     get: async (request, response) => {
-                        const {action} = request.query
-                        const users = await dal.find<User & {launchEmailSent?: string}>(`/items/users?limit=-1&fields=id,firstName,email&filter=${JSON.stringify({id:{"_contains":"x"}})}`)
+                        const { action } = request.query
+                        const users = await dal.find<User & { launchEmailSent?: string }>(`/items/users?limit=-1&fields=id,firstName,email&filter=${JSON.stringify({ id: { "_contains": "x" } })}`)
 
-                        for(const user of users) {
-                            const sent = await redis.get(`launchEmailSent:${user.id}`) as {email: string, sentAt: string} | null
-                            if(sent) {
+                        for (const user of users) {
+                            const sent = await redis.get(`launchEmailSent:${user.id}`) as { email: string, sentAt: string } | null
+                            if (sent) {
                                 user.launchEmailSent = sent.sentAt
                             }
                         }
 
-                        if(action === "send") {
+                        if (action === "send") {
                             const host = getAppUrl(request)
-                            const uusers = await Promise.all(users.map(user => resetPasswordRequest(user).then(id => ({user, url: `${host}/resetpassword?token=${id}`}))))
-                            const emailTemplate = await fs.readFile("./assets/emails/launch_reset_password.html", {encoding: "utf8"})
+                            const uusers = await Promise.all(users.map(user => resetPasswordRequest(user).then(id => ({ user, url: `${host}/resetpassword?token=${id}` }))))
+                            const emailTemplate = await fs.readFile("./assets/emails/launch_reset_password.html", { encoding: "utf8" })
                             const ret = []
                             const errors = []
-                            for(const {user, url} of uusers) {
-                                if(user.launchEmailSent) {
+                            for (const { user, url } of uusers) {
+                                if (user.launchEmailSent) {
                                     console.log("Already sent to", user.launchEmailSent)
                                     continue
                                 }
                                 const email = {
-                                    to: [{email: user.email, name: user.firstName}],
+                                    to: [{ email: user.email, name: user.firstName }],
                                     content: emailTemplate.replaceAll("%url%", url).replaceAll("%firstName%", user.firstName),
                                     subject: "🚀 Welcome to Kazaswap - Dive into Our New Version!",
                                 }
                                 try {
-                                    const r = await sendEmail({...email, contentType: "text/html"})
-                                    redis.save(`launchEmailSent:${user.id}`, {email: user.email, sentAt: new Date().toISOString()})
+                                    const r = await sendEmail({ ...email, contentType: "text/html" })
+                                    redis.save(`launchEmailSent:${user.id}`, { email: user.email, sentAt: new Date().toISOString() })
                                     ret.push(r)
 
-                                } catch(err) {
+                                } catch (err) {
                                     errors.push(user)
                                 }
                             }
-                            response.status(200).send({success: ret, errors})
+                            response.status(200).send({ success: ret, errors })
                         } else {
                             response.status(200).send(users)
                         }
@@ -159,29 +159,29 @@ const route:BRoute = {
             routes: {
                 ":propId": {
                     get: async (request, response) => {
-                        const {propId} = request.params
+                        const { propId } = request.params
                         const prop = await dal.get<Property>(`/items/properties/${propId}?${new URLSearchParams(request.query || {}).toString()}`)
-                        if(!prop) return response.status(404).send({error: "Not found"})
+                        if (!prop) return response.status(404).send({ error: "Not found" })
                         response.status(200).send<Property>(prop)
                     },
                     delete: async (request, response) => {
-                        const {propId} = request.params
+                        const { propId } = request.params
                         dal.delete(`/items/properties/${propId}`)
-                        .then(() => response.status(200).send({}))
-                        .catch((e:any) => response.status(500).send({error: e.message}))
+                            .then(() => response.status(200).send({}))
+                            .catch((e: any) => response.status(500).send({ error: e.message }))
                     },
                     routes: {
                         "verify": {
                             get: async (request, response) => {
-                                let {propId} = request.params
-                                if(!request.query.verify || (request.query.verify !== "true" && request.query.verify !== "false"))
-                                return response.status(400).send({error: "Invalid request"})
+                                let { propId } = request.params
+                                if (!request.query.verify || (request.query.verify !== "true" && request.query.verify !== "false"))
+                                    return response.status(400).send({ error: "Invalid request" })
                                 try {
                                     const property = await dal.get<Property>(`/items/properties/${propId}`)
                                     const wasVerified = !!property.verified
                                     const willVerify = request.query.verify === "true"
 
-                                    const updated = await dal.update<Property>(`/items/properties/${propId}`, {verified: willVerify, private: !willVerify})
+                                    const updated = await dal.update<Property>(`/items/properties/${propId}`, { verified: willVerify, private: !willVerify })
 
                                     if (!wasVerified && willVerify && property.owner) {
                                         try {
@@ -189,10 +189,10 @@ const route:BRoute = {
                                             const currentUser = await dal.get<User>(`/items/users/${property.owner}?fields=credits`).catch(() => ({ credits: 0 }))
                                             const currentCredits = (currentUser as any)?.credits ?? 0
                                             const newCredits = currentCredits + 5
-                                            
+
                                             // Update user credits
                                             await dal.update<User>(`/items/users/${property.owner}`, { credits: newCredits })
-                                            
+
                                             // log signup/property verification credit
                                             await dal.create(`/items/credits_logs`, {
                                                 hostId: property.owner,
@@ -209,8 +209,8 @@ const route:BRoute = {
                                     }
 
                                     response.status(200).send<Property>(updated)
-                                } catch (e:any) {
-                                    response.status(500).send({error: e.message})
+                                } catch (e: any) {
+                                    response.status(500).send({ error: e.message })
                                 }
                             }
                         },
@@ -226,10 +226,10 @@ const route:BRoute = {
             routes: {
                 ":srId": {
                     get: async (request, response) => {
-                        const {srId} = request.params
+                        const { srId } = request.params
                         const sr = await dal.get<SwapRequest>(`/items/swap_requests/${srId}?${new URLSearchParams(request.query || {}).toString()}`)
-                        if(!sr) return response.status(404).send({error: "Not found"})
-                        response.status(200).send({request: sr, chat: (await getChat(srId).then(d => d.data) || [])})
+                        if (!sr) return response.status(404).send({ error: "Not found" })
+                        response.status(200).send({ request: sr, chat: (await getChat(srId).then(d => d.data) || []) })
                     },
                 }
             }
@@ -242,10 +242,10 @@ const route:BRoute = {
         },
         "matches": {
             get: async (request, response) => {
-                const usersWithMatches = await dal.get<{user:string, count: number}[]>(`/items/matches?aggregate[count]=*&groupBy=user`)
-                const search = {id: {"_in": usersWithMatches.map(u => u.user)}}
+                const usersWithMatches = await dal.get<{ user: string, count: number }[]>(`/items/matches?aggregate[count]=*&groupBy=user`)
+                const search = { id: { "_in": usersWithMatches.map(u => u.user) } }
                 const users = await dal.find<User>(`/items/users?limit=-1&filter=${JSON.stringify(search)}`)
-                response.status(200).send(users.map(u => ({...u, matchCount: usersWithMatches.find(m => m.user === u.id)?.count || 0})))
+                response.status(200).send(users.map(u => ({ ...u, matchCount: usersWithMatches.find(m => m.user === u.id)?.count || 0 })))
             },
             put: async (request, response) => {
                 rebuildMatches({
@@ -253,14 +253,14 @@ const route:BRoute = {
                     userId: request.query.userId,
                     debug: request.query.debug === "true"
                 })
-                .then(d => response.status(201).send(d))
-                .catch((e:any) => response.status(500).send({error: e.message}))
+                    .then(d => response.status(201).send(d))
+                    .catch((e: any) => response.status(500).send({ error: e.message }))
             }
         }
         ,
         "credits": {
-              routes: {
-                 // New endpoint to send credits to a user
+            routes: {
+                // New endpoint to send credits to a user
                 "send": {
                     post: async (request, response) => {
                         const { userId: toUserId, credits: creditsToSend } = request.body;
@@ -318,6 +318,80 @@ const route:BRoute = {
                 },
                 "logs": {
                     get: async (request, response) => {
+                        const {
+                            userFrom,
+                            userTo,
+                            dateFrom,
+                            dateTo,
+                            reason,
+                            date,
+                            limit = "10",
+                            page = "1",
+                        } = request.query
+
+                        const filters: any = {}
+
+                        let userFromId: string | undefined
+                        let userToId: string | undefined
+
+                        if (userFrom) {
+                            const users = await dal
+                                .find<Pick<User, "id" | "firstName" | "lastName">>(
+                                    `/items/users?fields[]=id&fields[]=firstName&fields[]=lastName&filter=${encodeURIComponent(
+                                        JSON.stringify({
+                                            _or: [
+                                                { firstName: { _icontains: userFrom } },
+                                                { lastName: { _icontains: userFrom } },
+                                            ],
+                                        })
+                                    )}`
+                                )
+                                .catch(() => [])
+                            if (users.length) {
+                                filters.requesteeId = { _in: users.map(u => u.id) }
+                            }
+                        }
+
+                        if (userTo) {
+                            const users = await dal
+                                .find<Pick<User, "id" | "firstName" | "lastName">>(
+                                    `/items/users?fields[]=id&fields[]=firstName&fields[]=lastName&filter=${encodeURIComponent(
+                                        JSON.stringify({
+                                            _or: [
+                                                { firstName: { _icontains: userTo } },
+                                                { lastName: { _icontains: userTo } },
+                                            ],
+                                        })
+                                    )}`
+                                )
+                                .catch(() => [])
+                            if (users.length) {
+                                filters.hostId = { _in: users.map(u => u.id) }
+                            }
+                        }
+
+                        if (userFromId) {
+                            filters.requesteeId = { _eq: userFromId }
+                        }
+
+                        if (userToId) {
+                            filters.hostId = { _eq: userToId }
+                        }
+
+                        if (reason) {
+                            filters.reason = { _contains: reason }
+                        }
+
+                        if (date) {
+                            const startOfDay = `${date}T00:00:00.000Z`
+                            const endOfDay = `${date}T23:59:59.999Z`
+                            filters.createdAt = { _between: [startOfDay, endOfDay] }
+                        } else if (dateFrom || dateTo) {
+                            filters.createdAt = {}
+                            if (dateFrom) filters.createdAt._gte = dateFrom
+                            if (dateTo) filters.createdAt._lte = dateTo
+                        }
+
                         const qso: any = {
                             sort: "-createdAt",
                             "fields[]": [
@@ -330,7 +404,9 @@ const route:BRoute = {
                                 "reason",
                                 "details",
                             ],
-                            limit: request.query.limit || "-1",
+                            limit,
+                            page,
+                            filter: JSON.stringify(filters),
                         }
 
                         type CreditLog = {
@@ -396,7 +472,7 @@ const route:BRoute = {
                                         message = `${guestName} stayed ${stayed} nights and booking ${booked} nights so ${reverted} credit${reverted === 1 ? "" : "s"} is revert to ${guestName}`
                                     }
                                 }
-                            } catch {}
+                            } catch { }
                             return {
                                 id: idx + 1,
                                 date: formatDate(l.createdAt),
@@ -408,7 +484,13 @@ const route:BRoute = {
                             }
                         })
 
-                        return response.status(200).send(shaped)
+                        return response.status(200).send({
+                            page: Number(page),
+                            limit: Number(limit),
+                            count: logs.length,
+                            data: shaped,
+                        })
+
                     }
                 }
             }

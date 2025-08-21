@@ -79,113 +79,114 @@ const route: BRoute = {
                 response.status(200).send(sr)
             },
             post: async (request, response) => {
-                const u = request.user!
+                const u = request.user!;
                 const {
                     fromPropertyId,
                     toPropertyId,
                     dateFrom,
                     dateTo,
-                } = request.body
-                if (!toPropertyId) return response.status(400).send({ error: "Missing data" })
+                    isCustomDate = false,
+                } = request.body;
 
-                const fuser = await dal.get<Partial<User>>(`/items/users/${u.id}?fields=verified,firstName`)
-                if (!fuser || !fuser.verified) return response.status(400).send({ error: "User not verified" })
+                if (!toPropertyId) return response.status(400).send({ error: "Missing data" });
 
-                let fromProperty: Property | null = null
-                if (!fromPropertyId) {
-                    fromProperty = (await dal.find<Property>(`/items/properties?filter=${JSON.stringify({ owner: u.id })}`))[0]
-                } else {
-                    if (fromPropertyId === toPropertyId) return response.status(400).send({ error: "Cannot swap with the same property" })
-                    fromProperty = await dal.get<Property>(`/items/properties/${fromPropertyId}`).catch(err => null)
+                const fuser = await dal.get<Partial<User>>(`/items/users/${u.id}?fields=verified,firstName`);
+                if (!fuser || !fuser.verified) {
+                    return response.status(400).send({ error: "User not verified" });
                 }
-                if (!fromProperty) return response.status(400).send({ error: "Invalid property (from)" })
-                if (fromProperty.owner !== u.id) return response.status(400).send({ error: "Invalid property" })
-                if (!fromProperty.verified) return response.status(400).send({ error: "Cannot swap with unverified properties (from)" })
-                if (fromProperty.private) return response.status(400).send({ error: "Cannot swap with private properties" })
 
-                const toProperty = await dal.get<Property>(`/items/properties/${toPropertyId}`).catch(err => null)
-                if (!toProperty) return response.status(400).send({ error: "Invalid property (to)" })
-                if (toProperty.owner === u.id) return response.status(400).send({ error: "Cannot swap with your own property" })
-                if (toProperty.private) return response.status(400).send({ error: "Cannot swap with private properties" })
-                if (!toProperty.verified) return response.status(400).send({ error: "Cannot swap with unverified properties (to)" })
+                // Validate fromProperty
+                let fromProperty: Property | null = null;
+                if (!fromPropertyId) {
+                    fromProperty = (await dal.find<Property>(
+                        `/items/properties?filter=${JSON.stringify({ owner: u.id })}`
+                    ))[0];
+                } else {
+                    if (fromPropertyId === toPropertyId) {
+                        return response.status(400).send({ error: "Cannot swap with the same property" });
+                    }
+                    fromProperty = await dal.get<Property>(`/items/properties/${fromPropertyId}`).catch(err => null);
+                }
 
-                /* Note: We can receive swap requests even if we are not verified, but we can't accept them until we are */
-                // const tuser = await dal.get<Partial<User>>(`/items/users/${toProperty.owner}?fields=verified`)
-                // if(!tuser || !tuser.verified) return response.status(400).send({error: "User not verified"})
+                if (!fromProperty) return response.status(400).send({ error: "Invalid property (from)" });
+                if (fromProperty.owner !== u.id) return response.status(400).send({ error: "Invalid property" });
+                if (!fromProperty.verified) return response.status(400).send({ error: "Cannot swap with unverified properties (from)" });
+                if (fromProperty.private) return response.status(400).send({ error: "Cannot swap with private properties" });
 
-                // Calculate nights from dateFrom and dateTo, or use nights field as fallback
-                let nights = 1
+                // Validate toProperty
+                const toProperty = await dal.get<Property>(`/items/properties/${toPropertyId}`).catch(err => null);
+                if (!toProperty) return response.status(400).send({ error: "Invalid property (to)" });
+                if (toProperty.owner === u.id) return response.status(400).send({ error: "Cannot swap with your own property" });
+                if (toProperty.private) return response.status(400).send({ error: "Cannot swap with private properties" });
+                if (!toProperty.verified) return response.status(400).send({ error: "Cannot swap with unverified properties (to)" });
+
+                // Nights calculation
+                let nights = 1;
                 if (dateFrom && dateTo) {
                     try {
-                        const startDate = new Date(dateFrom)
-                        const endDate = new Date(dateTo)
-                        const timeDiff = endDate.getTime() - startDate.getTime()
-                        const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24))
-                        nights = Math.max(1, daysDiff)
+                        const startDate = new Date(dateFrom);
+                        const endDate = new Date(dateTo);
+                        if (endDate <= startDate) {
+                            return response.status(400).send({ error: "End date must be after start date" });
+                        }
+                        const timeDiff = endDate.getTime() - startDate.getTime();
+                        nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
                     } catch (dateError) {
-                        console.error("Error calculating nights from dates:", dateError)
-                        nights = 1
+                        console.error("Error calculating nights from dates:", dateError);
+                        return response.status(400).send({ error: "Invalid date format" });
                     }
                 } else {
-                    // Fallback to nights field if dates not provided
-                    const nightsRaw = request.body?.nights
-                    nights = Math.max(
-                        1,
-                        typeof nightsRaw === "number" ? nightsRaw : (parseInt(nightsRaw || "1", 10) || 1)
-                    )
+                    return response.status(400).send({ error: "dateFrom and dateTo are required" });
                 }
 
-                // Check availability on target property (best-effort based on dateDuration text)
-                const inferAvailableNights = (p: Property): number | null => {
-                    try {
-                        if (p.dateDuration && typeof p.dateDuration === "string") {
-                            // Try ranges like "3-5", "3 to 5"
-                            const range = p.dateDuration.match(/(\d+)\s*(?:-|to)\s*(\d+)/i)
-                            if (range) return parseInt(range[2]!, 10)
-                            const single = p.dateDuration.match(/\d+/)
-                            if (single) return parseInt(single[0]!, 10)
-                        }
-                    } catch {}
-                    return null
-                }
-                const availableNights = inferAvailableNights(toProperty)
-                
-                if (availableNights !== null && nights > availableNights) {
-                    return response.status(400).send({
-                        error: "Requested nights exceed property's available duration",
-                        requested: nights,
-                        available: availableNights,
-                    })
+                // Fetch guest credits
+                const requester = await dal.get<Partial<User>>(`/items/users/${u.id}?fields=credits`).catch(err => null);
+                const availableCredits = (requester as any)?.credits ?? 0;
+
+                // Availability & Credit Logic
+
+                if (!isCustomDate) {
+                    // Case 1: Guest picks one of host's slots
+                    const availableDates = toProperty.availebleDates || [];
+                    const requestedRange = { start: new Date(dateFrom), end: new Date(dateTo) };
+
+                    const isValidSlot = availableDates.some(slot => {
+                        if (!slot.value || slot.value.length < 2) return false;
+                        const slotStart = new Date(slot.value[0]);
+                        const slotEnd = new Date(slot.value[1]);
+                        return requestedRange.start >= slotStart && requestedRange.end <= slotEnd;
+                    });
+
+
+                    if (!isValidSlot) {
+                        return response.status(400).send({
+                            error: "Requested dates do not match any available slots",
+                            availableSlots: availableDates,
+                        });
+                    }
+
+                    // Credits check
+                    if (nights > availableCredits) {
+                        return response.status(400).send({
+                            error: `You have only ${availableCredits} credits, but the selected slot requires ${nights} credits`,
+                            requested: nights,
+                            available: availableCredits,
+                        });
+                    }
+                } else {
+                    // Case 2: Guest suggests custom dates
+                    if (nights > availableCredits) {
+                        return response.status(400).send({
+                            error: `You have only ${availableCredits} credits, but the suggested dates require ${nights} credits`,
+                            requested: nights,
+                            available: availableCredits,
+                        });
+                    }
                 }
 
-                // Ensure requester has enough credits at request time
-                const requester = await dal.get<Partial<User>>(`/items/users/${u.id}?fields=credits`).catch(err => null)
-                const availableCredits = (requester as any)?.credits ?? 0
-                
-                // Prevent users from swapping if property's maximum availability exceeds their credits
-                if (availableNights !== null && availableNights > availableCredits) {
-                    return response.status(400).send({
-                        error: "Property availability exceeds your credits",
-                        available: availableCredits,
-                        propertyAvailability: availableNights,
-                        message: `You need at least ${availableNights} credits for this property`
-                    })
-                }
-                
-                // Prevent users from requesting more nights than they have credits
-                if (nights > availableCredits) {
-                    return response.status(400).send({ 
-                        error: "Cannot request more nights than available credits", 
-                        requested: nights,
-                        available: availableCredits
-                    })
-                }
-                
-                // Ensure requester has enough credits for the requested nights
-                if (availableCredits < nights) {
-                    return response.status(400).send({ error: "Insufficient credits", required: nights, available: availableCredits })
-                }
-
+                // -------------------------
+                // Prevent duplicate pending swap requests
+                // -------------------------
                 const qso = {
                     filter: JSON.stringify({
                         "_and": [
@@ -200,10 +201,14 @@ const route: BRoute = {
                             { "status": "pending" }
                         ]
                     })
+                };
+                const usp = new URLSearchParams(qso).toString();
+                const existing = await dal.find<SwapRequest>(`/items/swap_requests?${usp}`);
+                if (existing.length) {
+                    return response.status(400).send({ error: "Swap request already exists" });
                 }
-                const usp = new URLSearchParams(qso).toString()
-                const existing = await dal.find<SwapRequest>(`/items/swap_requests?${usp}`)
-                if (existing.length) return response.status(400).send({ error: "Swap request already exists" })
+
+                // Create swap request
                 const data = {
                     from: u.id,
                     to: toProperty.owner,
@@ -212,23 +217,29 @@ const route: BRoute = {
                     nights: nights.toString(),
                     dateFrom: dateFrom || null,
                     dateTo: dateTo || null,
-                    createdAt: new Date().toISOString()
-                }
-                const sr = await dal.create<SwapRequest>(`/items/swap_requests`, data)
+                    createdAt: new Date().toISOString(),
+                    isCustomDate,
+                };
+                const sr = await dal.create<SwapRequest>(`/items/swap_requests`, data);
 
-                await notification({
-                    from: u.id,
-                    to: toProperty.owner,
-                    type: "swaprequest_new",
-                    title: "New Swap Request",
-                }, {
-                    url: `${getAppUrl(request)}/chats/${sr.id}`,
-                    user: fuser.firstName,
-                    location: fromProperty.city || fromProperty.country
-                })
+                // Notify host
+                await notification(
+                    {
+                        from: u.id,
+                        to: toProperty.owner,
+                        type: "swaprequest_new",
+                        title: "New Swap Request",
+                    },
+                    {
+                        url: `${getAppUrl(request)}/chats/${sr.id}`,
+                        user: fuser.firstName,
+                        location: fromProperty.city || fromProperty.country,
+                    }
+                );
 
-                response.status(200).send(sr)
+                response.status(200).send(sr);
             },
+
             routes: {
                 "history": {
                     get: async (request, response) => {
@@ -422,7 +433,7 @@ const route: BRoute = {
                                         const hostUser = await dal.get<User>(`/items/users/${sr.to}?fields=credits`).catch(() => ({ credits: 0 }))
                                         const hostCredits = (hostUser as any)?.credits ?? 0
                                         await dal.update<User>(`/items/users/${sr.to}`, { credits: hostCredits + creditsToDeduct })
-                                        
+
                                         // Requestee loses credits
                                         const requesteeUser = await dal.get<User>(`/items/users/${sr.from}?fields=credits`).catch(() => ({ credits: 0 }))
                                         const requesteeCredits = (requesteeUser as any)?.credits ?? 0
@@ -435,8 +446,8 @@ const route: BRoute = {
                                             creditsChanged: creditsToDeduct,
                                             swapRequestId: sr.id,
                                             reason: "on swap",
-                                            details: JSON.stringify({ 
-                                                type: "swap_finalize", 
+                                            details: JSON.stringify({
+                                                type: "swap_finalize",
                                                 nights: creditsToDeduct,
                                                 propertyId: sr.toProperty,
                                                 calculatedFromProperty: true
@@ -558,7 +569,7 @@ const route: BRoute = {
                                     const hostUser = await dal.get<User>(`/items/users/${sr.to}?fields=credits`).catch(() => ({ credits: 0 }))
                                     const hostCredits = (hostUser as any)?.credits ?? 0
                                     await dal.update<User>(`/items/users/${sr.to}`, { credits: Math.max(0, hostCredits - revertBy) })
-                                    
+
                                     const requesteeUser = await dal.get<User>(`/items/users/${sr.from}?fields=credits`).catch(() => ({ credits: 0 }))
                                     const requesteeCredits = (requesteeUser as any)?.credits ?? 0
                                     await dal.update<User>(`/items/users/${sr.from}`, { credits: requesteeCredits + revertBy })

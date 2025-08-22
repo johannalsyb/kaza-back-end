@@ -147,10 +147,10 @@ const route: BRoute = {
 
                 if (!isCustomDate) {
                     // Case 1: Guest picks one of host's slots
-                    const availableDates = toProperty.availebleDates || [];
+                    const availebleDates = toProperty.availebleDates || [];
                     const requestedRange = { start: new Date(dateFrom), end: new Date(dateTo) };
 
-                    const isValidSlot = availableDates.some(slot => {
+                    const isValidSlot = availebleDates.some(slot => {
                         if (!slot.value || slot.value.length < 2) return false;
                         const slotStart = new Date(slot.value[0]);
                         const slotEnd = new Date(slot.value[1]);
@@ -161,7 +161,7 @@ const route: BRoute = {
                     if (!isValidSlot) {
                         return response.status(400).send({
                             error: "Requested dates do not match any available slots",
-                            availableSlots: availableDates,
+                            availableSlots: availebleDates,
                         });
                     }
 

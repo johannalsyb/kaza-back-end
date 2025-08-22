@@ -147,23 +147,22 @@ const route: BRoute = {
 
                 if (!isCustomDate) {
                     // Case 1: Guest picks one of host's slots
-                    const availebleDates = toProperty.availebleDates || [];
-                    const requestedRange = { start: new Date(dateFrom), end: new Date(dateTo) };
+                    // const availebleDates = toProperty.availebleDates || [];
+                    // console.log("toProperty.availebleDates", toProperty.availebleDates);
+                    // const requestedRange = { start: new Date(dateFrom), end: new Date(dateTo) };
 
-                    const isValidSlot = availebleDates.some(slot => {
-                        if (!slot.value || slot.value.length < 2) return false;
-                        const slotStart = new Date(slot.value[0]);
-                        const slotEnd = new Date(slot.value[1]);
-                        return requestedRange.start >= slotStart && requestedRange.end <= slotEnd;
-                    });
-
-
-                    if (!isValidSlot) {
-                        return response.status(400).send({
-                            error: "Requested dates do not match any available slots",
-                            availableSlots: availebleDates,
-                        });
-                    }
+                    // const isValidSlot = availebleDates.some(slot => {
+                    //     if (!slot.value || slot.value.length < 2) return false;
+                    //     const slotStart = new Date(slot.value[0]);
+                    //     const slotEnd = new Date(slot.value[1]);
+                    //     return requestedRange.start >= slotStart && requestedRange.end <= slotEnd;
+                    // });
+                    // if (!isValidSlot) {
+                    //     return response.status(400).send({
+                    //         error: "Requested dates do not match any available slots",
+                    //         availebleSlots: availebleDates,
+                    //     });
+                    // }
 
                     // Credits check
                     if (nights > availableCredits) {

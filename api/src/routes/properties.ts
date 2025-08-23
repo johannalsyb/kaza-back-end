@@ -211,7 +211,8 @@ const route: BRoute = {
             updatedAt: new Date().toISOString(),
             verified: false,
             private: !verified,
-            availebleDates: availebleDates || [],
+            availebleDates: request?.body?.availebleDates?.join(',') || '',
+            // availebleDates: availebleDates || [],
         }
         property.images = ""
 

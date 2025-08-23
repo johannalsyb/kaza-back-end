@@ -25,7 +25,41 @@ export class CreditManager {
 
     static async processSwapRequest(swapRequest: SwapRequest): Promise<void> {
         const nights = parseInt(swapRequest.nights || '1', 10)
-        const dateTo = new Date(swapRequest.dateTo!)
+        
+        console.log("Processing swap request:", {
+            id: swapRequest.id,
+            dateTo: swapRequest.dateTo,
+            nights: nights
+        });
+        
+        // Validate dateTo
+        if (!swapRequest.dateTo) {
+            throw new Error('dateTo is required for swap request processing')
+        }
+        
+        let dateTo: Date;
+        try {
+            dateTo = new Date(swapRequest.dateTo);
+            console.log("Parsed dateTo:", {
+                original: swapRequest.dateTo,
+                parsed: dateTo,
+                isValid: !isNaN(dateTo.getTime())
+            });
+            
+            if (isNaN(dateTo.getTime())) {
+                // Try parsing as ISO string if it's not already
+                const isoDate = new Date(swapRequest.dateTo + 'T00:00:00.000Z');
+                if (!isNaN(isoDate.getTime())) {
+                    dateTo = isoDate;
+                    console.log("Successfully parsed as ISO date:", dateTo.toISOString());
+                } else {
+                    throw new Error(`Invalid dateTo format: ${swapRequest.dateTo}`)
+                }
+            }
+        } catch (dateError) {
+            console.error("Date parsing error:", dateError);
+            throw new Error(`Failed to parse dateTo: ${swapRequest.dateTo}`)
+        }
 
         // Deduct credits from guest immediately
         await this.deductCreditsFromGuest(swapRequest.from, nights)

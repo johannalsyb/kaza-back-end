@@ -505,7 +505,7 @@ const route: BRoute = {
                             await dal.create("/items/credits_logs", {
                                 reason: "manual cron trigger by admin",
                                 details: JSON.stringify({
-                                    triggeredBy: request.user?.firstName,
+                                    triggeredBy: request.user?.id || "System",
                                     triggeredAt: new Date().toISOString()
                                 }),
                                 createdAt: new Date().toISOString()

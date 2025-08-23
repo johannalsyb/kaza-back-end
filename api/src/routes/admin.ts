@@ -503,6 +503,10 @@ const route: BRoute = {
                         try {
                             // 📌 Log manual trigger by admin
                             await dal.create("/items/credits_logs", {
+                                hostId: "system",             
+                                requesteeId: "system",         
+                                creditsChanged: 0,            
+                                swapRequestId: null,
                                 reason: "manual cron trigger by admin",
                                 details: JSON.stringify({
                                     triggeredBy: request.user?.id || "System",

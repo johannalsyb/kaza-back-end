@@ -17,6 +17,7 @@ import fs from "fs/promises"
 import sendEmail from "../services/email"
 import { rebuildMatches } from '../models/match'
 import { debug } from 'console'
+import { CreditManager, CreditLedgerEntry } from '../services/creditManager'
 
 const route: BRoute = {
     routes: {
@@ -492,9 +493,96 @@ const route: BRoute = {
                         })
 
                     }
+                },
+                "test-cron": {
+                    post: async (request, response) => {
+                        // if (!request.user || (request.user.role !== "admin" && request.user.role !== "superadmin")) {
+                        //     return response.status(401).send({ error: "Unauthorized" })
+                        // }
+
+                        try {
+                            // 📌 Log manual trigger by admin
+                            await dal.create("/items/credits_logs", {
+                                reason: "manual cron trigger by admin",
+                                details: JSON.stringify({
+                                    triggeredBy: request.user?.firstName,
+                                    triggeredAt: new Date().toISOString()
+                                }),
+                                createdAt: new Date().toISOString()
+                            })
+                            const processed = await CreditManager.processDailyCreditCron()
+
+                            response.status(200).send({
+                                message: "Test cron executed successfully",
+                                processedCount: processed.length,
+                                processed
+                            })
+                        } catch (error) {
+                            console.error("Error executing test cron job:", error)
+                            response.status(500).send({ error: "Failed to execute test cron job" })
+                        }
+                    }
+                }
+
+            }
+        },
+        "credits-ledger": {
+            get: async (request, response) => {
+                // if (!request.user || (request.user.role !== "admin" && request.user.role !== "superadmin")) {
+                //     return response.status(401).send({ error: "Unauthorized" });
+                // }
+
+                const { page = 1, limit = 50, status, swapRequestId } = request.query;
+                const offset = (parseInt(page as string) - 1) * parseInt(limit as string);
+
+                let filter: any = {};
+                if (status) filter.status = status;
+                if (swapRequestId) filter.swapRequestId = swapRequestId;
+
+                const qso: any = {
+                    "filter": JSON.stringify(filter),
+                    "fields[]": "*",
+                    "limit": limit,
+                    "offset": offset,
+                    "sort[]": "-createdAt"
+                };
+
+                try {
+                    const ledgerEntries = await dal.find<CreditLedgerEntry>(`/items/credits_ledger?${new URLSearchParams(qso).toString()}`);
+                    const total = await dal.find<CreditLedgerEntry>(`/items/credits_ledger?filter=${encodeURIComponent(JSON.stringify(filter))}&fields[]=id&limit=-1`);
+
+                    response.status(200).send({
+                        data: ledgerEntries,
+                        pagination: {
+                            page: parseInt(page as string),
+                            limit: parseInt(limit as string),
+                            total: total.length,
+                            totalPages: Math.ceil(total.length / parseInt(limit as string))
+                        }
+                    });
+                } catch (error) {
+                    console.error("Error fetching credits ledger:", error);
+                    response.status(500).send({ error: "Failed to fetch credits ledger" });
+                }
+            },
+            routes: {
+                "process-pending": {
+                    post: async (request, response) => {
+                        // if (!request.user || (request.user.role !== "admin" && request.user.role !== "superadmin")) {
+                        //     return response.status(401).send({ error: "Unauthorized" });
+                        // }
+
+                        try {
+                            await CreditManager.processDailyCreditCron();
+                            response.status(200).send({ message: "Pending credits processed successfully" });
+                        } catch (error) {
+                            console.error("Error processing pending credits:", error);
+                            response.status(500).send({ error: "Failed to process pending credits" });
+                        }
+                    }
                 }
             }
-        }
+        },
         // "bubble": {
         //     routes: {
         //         "import": {

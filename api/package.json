@@ -7,7 +7,8 @@
     "build": "tsc --build",
     "test": "jest",
     "start": "ts-node src/server.ts",
-    "watch": "nodemon src/server.ts"
+    "watch": "nodemon src/server.ts",
+    "test-credits": "ts-node src/test-credit-system.ts"
   },
   "author": "Ben G <beng@onpacegroup.com>",
   "license": "ISC",
@@ -18,6 +19,7 @@
     "fastify": "^4.19.2",
     "google-auth-library": "^10.1.0",
     "heic-decode": "^2.0.0",
+    "node-cron": "^4.2.1",
     "pdf-lib": "^1.17.1",
     "redis": "^4.6.14",
     "sharp": "^0.32.6",

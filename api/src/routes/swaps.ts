@@ -9,6 +9,7 @@ import { addChatMessage, findNewMessageScheduledNotificationForUser, getChatUrl,
 import notification, { deleteScheduled } from "../utils/notifications"
 import { getAppUrl } from '../utils'
 import { publicPropertyWithOwnerFields } from './properties'
+import { CreditManager } from '../services/creditManager'
 
 import stream from 'stream'
 import { randomUUID } from 'crypto'
@@ -221,6 +222,17 @@ const route: BRoute = {
                 };
                 const sr = await dal.create<SwapRequest>(`/items/swap_requests`, data);
 
+                // Process credits using the new credit management system
+                try {
+                    await CreditManager.processSwapRequest(sr);
+                } catch (error) {
+                    // If credit processing fails, delete the swap request and return error
+                    await dal.delete(`/items/swap_requests/${sr.id}`).catch(() => {});
+                    return response.status(400).send({
+                        error: error instanceof Error ? error.message : "Failed to process credits"
+                    });
+                }
+
                 // Notify host
                 await notification(
                     {
@@ -385,11 +397,11 @@ const route: BRoute = {
                                             typeof nightsRaw === "number" ? nightsRaw : (parseInt(nightsRaw || "1", 10) || 1)
                                         )
                                         // Requestee is the user who initiated the request (`from`)
-                                        const requestee = await dal.get<Partial<User>>(`/items/users/${sr.from}?fields=credits`).catch(err => null)
-                                        const availableCredits = (requestee as any)?.credits ?? 0
-                                        if (availableCredits < nights) {
-                                            return response.status(400).send({ error: "Insufficient credits", required: nights, available: availableCredits })
-                                        }
+                                        // const requestee = await dal.get<Partial<User>>(`/items/users/${sr.from}?fields=credits`).catch(err => null)
+                                        // const availableCredits = (requestee as any)?.credits ?? 0
+                                        // if (availableCredits < nights) {
+                                        //     return response.status(400).send({ error: "Insufficient credits", required: nights, available: availableCredits })
+                                        // }
                                     }
                                 }
                                 if (sr.from === u.id) {
@@ -409,53 +421,11 @@ const route: BRoute = {
                                     sr.updatedAt = new Date().toISOString()
                                     up = await dal.update<SwapRequest>(`/items/swap_requests/${swapRequestId}`, { id: sr.id, status: "accepted" })
 
-                                    // Calculate credits based on property availability if present, otherwise default to 1
-                                    let creditsToDeduct = 1
+                                    // Handle swap acceptance in credit management system
                                     try {
-                                        // Get the property to check its availability
-                                        const property = await dal.get(`/items/properties/${sr.toProperty}?fields=dateDuration,availebleDates`).catch(() => null) as any
-                                        if (property && property.dateDuration) {
-                                            // Try to parse dateDuration as number of days
-                                            const duration = parseInt(property.dateDuration, 10)
-                                            if (!isNaN(duration) && duration > 0) {
-                                                creditsToDeduct = duration
-                                            }
-                                        }
-                                    } catch (propertyError) {
-                                        console.error("Failed to get property availability:", propertyError)
-                                        // Default to 1 credit if property fetch fails
-                                        creditsToDeduct = 1
-                                    }
-
-                                    // Host gets credits
-                                    try {
-                                        const hostUser = await dal.get<User>(`/items/users/${sr.to}?fields=credits`).catch(() => ({ credits: 0 }))
-                                        const hostCredits = (hostUser as any)?.credits ?? 0
-                                        await dal.update<User>(`/items/users/${sr.to}`, { credits: hostCredits + creditsToDeduct })
-
-                                        // Requestee loses credits
-                                        const requesteeUser = await dal.get<User>(`/items/users/${sr.from}?fields=credits`).catch(() => ({ credits: 0 }))
-                                        const requesteeCredits = (requesteeUser as any)?.credits ?? 0
-                                        await dal.update<User>(`/items/users/${sr.from}`, { credits: Math.max(0, requesteeCredits - creditsToDeduct) })
-
-                                        // log credit changes (so frontend can show it)
-                                        await dal.create(`/items/credits_logs`, {
-                                            hostId: sr.to,
-                                            requesteeId: sr.from,
-                                            creditsChanged: creditsToDeduct,
-                                            swapRequestId: sr.id,
-                                            reason: "on swap",
-                                            details: JSON.stringify({
-                                                type: "swap_finalize",
-                                                nights: creditsToDeduct,
-                                                propertyId: sr.toProperty,
-                                                calculatedFromProperty: true
-                                            }),
-                                            createdAt: new Date().toISOString()
-                                        });
-                                        console.log(`Created swap credits log: host ${sr.to} +${creditsToDeduct}, requestee ${sr.from} -${creditsToDeduct} (calculated from property availability)`)
-                                    } catch (creditError) {
-                                        console.error("Failed to update credits or create swap log:", creditError)
+                                        await CreditManager.handleSwapAcceptance(sr);
+                                    } catch (error) {
+                                        console.error("Failed to handle swap acceptance in credit management:", error);
                                     }
 
                                     await Promise.all([
@@ -611,6 +581,13 @@ const route: BRoute = {
                                     status: "declined",
                                     notes: JSON.stringify(nnotes)
                                 })
+
+                                // Handle swap decline in credit management system
+                                try {
+                                    await CreditManager.handleSwapDecline(sr, u.id);
+                                } catch (error) {
+                                    console.error("Failed to handle swap decline in credit management:", error);
+                                }
 
                                 await notification({
                                     to: sr.from === u.id ? sr.to : sr.from,

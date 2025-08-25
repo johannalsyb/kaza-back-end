@@ -38,6 +38,11 @@ const route: BRoute = {
                 if (!users.length)
                     return response.status(401).send({ error: "Invalid credentials" })
                 const user = users[0]
+
+                // Block login if phone not verified
+                if (!user.phoneVerified) {
+                    return response.status(403).send({ error: "Please verify your phone number before logging in" })
+                }
                 if (user.password !== hash(password))
                     return response.status(401).send({ error: "Invalid credentials" })
 
@@ -67,16 +72,16 @@ const route: BRoute = {
                     return response.status(400).send({ error: "Missing data" })
 
                 const users = await findByEmail(email)
-                
-                
+
+
                 if (users.length > 0) {
                     const existingUser = users[0]
-                    
-                   
+
+
                     if (existingUser.phone !== phone && !existingUser.phoneVerified) {
                         console.log(`Deleting unverified account for email ${email} with old phone ${existingUser.phone} and creating new account with phone ${phone}`)
-                        
-                        
+
+
                         try {
                             const keys = await redis.keys(`phone:*`)
                             for (const key of keys) {
@@ -89,8 +94,8 @@ const route: BRoute = {
                         } catch (error) {
                             console.error('Error cleaning up phone verification codes:', error)
                         }
-                        
-                       
+
+
                         try {
                             const tempItems = await dal.find<Temp>(`/items/temp?filter=${JSON.stringify({ type: "verifyemail", data: existingUser.id })}`)
                             for (const temp of tempItems) {
@@ -100,17 +105,17 @@ const route: BRoute = {
                         } catch (error) {
                             console.error('Error cleaning up email verification tokens:', error)
                         }
-                        
+
                         await dal.delete(`/items/users/${existingUser.id}`)
                     } else if (existingUser.phone === phone) {
-                        
+
                         return response.status(401).send({ error: "User already exists" })
                     } else if (existingUser.phoneVerified) {
-                        
+
                         return response.status(401).send({ error: "User already exists with verified phone number" })
                     }
                 }
-                
+
                 const user = await dal.create<User>(`/items/users`, {
                     email,
                     password: hash(password),
@@ -121,10 +126,12 @@ const route: BRoute = {
                     onboarding,
                     createdAt: new Date().toISOString(),
                     credits: 0,
+                    phoneVerified: false //default until they enter code
+
                 })
 
                 const host = getAppUrl(request)
-                const feAppEndpoint=getFEAppUrl()
+                const feAppEndpoint = getFEAppUrl()
                 Promise.all([
                     Users.email.sendVerifyEmail(user, feAppEndpoint),
                     Users.phone.sendVerifySms(user)
@@ -166,10 +173,24 @@ const route: BRoute = {
                         status = valid[0]
                         message = valid[1]
                     } else if (code) { // This is for phone verification
-                        const valid = await Users.phone.verify(code)
-                        if (!valid) {
+                        const user = await Users.phone.verify(code)
+                        if (!user) {
                             status = 400
                             message = "Invalid code"
+                        } else {
+                            const newCredits = (user.credits ?? 0) + 5
+                            await dal.update<User>(`/items/users/${user.id}`, {
+                                credits: newCredits,
+                                // phoneVerified: true
+                            })
+                            await dal.create(`/items/credits_logs`, {
+                                hostId: user.id,
+                                requesteeId: null,
+                                creditsChanged: 5,
+                                swapRequestId: null,
+                                reason: "user verification",
+                                createdAt: new Date().toISOString()
+                            })
                         }
                     }
                     if (status !== 200) throw [status, message]
@@ -301,7 +322,7 @@ const route: BRoute = {
                             password: '',
                             registrationProvider: 'google',
                             emailVerified: true,
-                                credits: 0,
+                            credits: 0,
                         })
                     }
                     const jwt = encrypt(user)

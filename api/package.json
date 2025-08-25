@@ -8,7 +8,8 @@
     "test": "jest",
     "start": "ts-node src/server.ts",
     "watch": "nodemon src/server.ts",
-    "test-credits": "ts-node src/test-credit-system.ts"
+    "test-credits": "ts-node src/test-credit-system.ts",
+    "test-dates": "ts-node src/test-date-parsing.ts"
   },
   "author": "Ben G <beng@onpacegroup.com>",
   "license": "ISC",

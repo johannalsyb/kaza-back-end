@@ -81,8 +81,8 @@ export const phone = {
         const user = await redis.get(`phone:${code}`)
         if (!user || !user.id) return false
         await redis.remove(`phone:${code}`)
-        await dal.update<User>(`/items/users/${user.id}`, { phoneVerified: true, updatedAt: new Date().toISOString() })
-        return true
+        const updatedUser = await dal.update<User>(`/items/users/${user.id}`, { phoneVerified: true, updatedAt: new Date().toISOString() })
+        return updatedUser
     }
 }
 

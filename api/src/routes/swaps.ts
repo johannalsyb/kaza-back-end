@@ -79,6 +79,232 @@ const route: BRoute = {
                 })
                 response.status(200).send(sr)
             },
+            // post: async (request, response) => {
+            //     const u = request.user!;
+            //     const {
+            //         fromPropertyId,
+            //         toPropertyId,
+            //         dateFrom,
+            //         dateTo,
+            //         isCustomDate = false,
+            //     } = request.body;
+
+            //     console.log("Request body values:", {
+            //         dateFrom,
+            //         dateTo,
+            //         dateFromType: typeof dateFrom,
+            //         dateToType: typeof dateTo,
+            //         isCustomDate
+            //     });
+
+            //     if (!toPropertyId) return response.status(400).send({ error: "Missing data" });
+
+            //     // Validate that dates are provided
+            //     if (!dateFrom || !dateTo) {
+            //         return response.status(400).send({ 
+            //             error: "dateFrom and dateTo are required",
+            //             received: { dateFrom, dateTo }
+            //         });
+            //     }
+
+            //     const fuser = await dal.get<Partial<User>>(`/items/users/${u.id}?fields=verified,firstName`);
+            //     if (!fuser || !fuser.verified) {
+            //         return response.status(400).send({ error: "User not verified" });
+            //     }
+
+            //     // Validate fromProperty
+            //     let fromProperty: Property | null = null;
+            //     if (!fromPropertyId) {
+            //         fromProperty = (await dal.find<Property>(
+            //             `/items/properties?filter=${JSON.stringify({ owner: u.id })}`
+            //         ))[0];
+            //     } else {
+            //         if (fromPropertyId === toPropertyId) {
+            //             return response.status(400).send({ error: "Cannot swap with the same property" });
+            //         }
+            //         fromProperty = await dal.get<Property>(`/items/properties/${fromPropertyId}`).catch(err => null);
+            //     }
+
+            //     if (!fromProperty) return response.status(400).send({ error: "Invalid property (from)" });
+            //     if (fromProperty.owner !== u.id) return response.status(400).send({ error: "Invalid property" });
+            //     if (!fromProperty.verified) return response.status(400).send({ error: "Cannot swap with unverified properties (from)" });
+            //     if (fromProperty.private) return response.status(400).send({ error: "Cannot swap with private properties" });
+
+            //     // Validate toProperty
+            //     const toProperty = await dal.get<Property>(`/items/properties/${toPropertyId}`).catch(err => null);
+            //     if (!toProperty) return response.status(400).send({ error: "Invalid property (to)" });
+            //     if (toProperty.owner === u.id) return response.status(400).send({ error: "Cannot swap with your own property" });
+            //     if (toProperty.private) return response.status(400).send({ error: "Cannot swap with private properties" });
+            //     if (!toProperty.verified) return response.status(400).send({ error: "Cannot swap with unverified properties (to)" });
+
+            //     // Nights calculation
+            //     let nights = 1;
+            //     if (dateFrom && dateTo) {
+            //         try {
+            //             console.log("Parsing dates:", { dateFrom, dateTo });
+
+            //             const startDate = new Date(dateFrom);
+            //             const endDate = new Date(dateTo);
+
+            //             console.log("Parsed dates:", {
+            //                 startDate: startDate.toISOString(),
+            //                 endDate: endDate.toISOString(),
+            //                 startValid: !isNaN(startDate.getTime()),
+            //                 endValid: !isNaN(endDate.getTime())
+            //             });
+
+            //             if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            //                 return response.status(400).send({ 
+            //                     error: "Invalid date format",
+            //                     details: { dateFrom, dateTo }
+            //                 });
+            //             }
+
+            //             if (endDate <= startDate) {
+            //                 return response.status(400).send({ error: "End date must be after start date" });
+            //             }
+            //             const timeDiff = endDate.getTime() - startDate.getTime();
+            //             nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+            //             console.log("Calculated nights:", nights);
+            //         } catch (dateError) {
+            //             console.error("Error calculating nights from dates:", dateError);
+            //             return response.status(400).send({ error: "Invalid date format" });
+            //         }
+            //     } else {
+            //         return response.status(400).send({ error: "dateFrom and dateTo are required" });
+            //     }
+
+            //     // Fetch guest credits
+            //     const requester = await dal.get<Partial<User>>(`/items/users/${u.id}?fields=credits`).catch(err => null);
+            //     const availableCredits = (requester as any)?.credits ?? 0;
+
+            //     // Availability & Credit Logic
+
+            //     if (!isCustomDate) {
+            //         // Case 1: Guest picks one of host's slots
+            //         // const availebleDates = toProperty.availebleDates || [];
+            //         // console.log("toProperty.availebleDates", toProperty.availebleDates);
+            //         // const requestedRange = { start: new Date(dateFrom), end: new Date(dateTo) };
+
+            //         // const isValidSlot = availebleDates.some(slot => {
+            //         //     if (!slot.value || slot.value.length < 2) return false;
+            //         //     const slotStart = new Date(slot.value[0]);
+            //         //     const slotEnd = new Date(slot.value[1]);
+            //         //     return requestedRange.start >= slotStart && requestedRange.end <= slotEnd;
+            //         // });
+            //         // if (!isValidSlot) {
+            //         //     return response.status(400).send({
+            //         //         error: "Requested dates do not match any available slots",
+            //         //         availebleSlots: availebleDates,
+            //         //     });
+            //         // }
+
+            //         // Credits check
+            //         if (nights > availableCredits) {
+            //             return response.status(400).send({
+            //                 error: `You have only ${availableCredits} credits, but the selected slot requires ${nights} credits`,
+            //                 requested: nights,
+            //                 available: availableCredits,
+            //             });
+            //         }
+            //     } else {
+            //         // Case 2: Guest suggests custom dates
+            //         if (nights > availableCredits) {
+            //             return response.status(400).send({
+            //                 error: `You have only ${availableCredits} credits, but the suggested dates require ${nights} credits`,
+            //                 requested: nights,
+            //                 available: availableCredits,
+            //             });
+            //         }
+            //     }
+
+            //     // -------------------------
+            //     // Prevent duplicate pending swap requests
+            //     // -------------------------
+            //     const qso = {
+            //         filter: JSON.stringify({
+            //             "_and": [
+            //                 { "fromProperty": fromProperty.id },
+            //                 { "toProperty": toProperty.id },
+            //                 {
+            //                     "_or": [
+            //                         { "fromAccepted": { "_null": true } },
+            //                         { "toAccepted": { "_null": true } }
+            //                     ]
+            //                 },
+            //                 { "status": "pending" }
+            //             ]
+            //         })
+            //     };
+            //     const usp = new URLSearchParams(qso).toString();
+            //     const existing = await dal.find<SwapRequest>(`/items/swap_requests?${usp}`);
+            //     if (existing.length) {
+            //         return response.status(400).send({ error: "Swap request already exists" });
+            //     }
+
+            //     // Create swap request
+            //     const data = {
+            //         from: u.id,
+            //         to: toProperty.owner,
+            //         fromProperty: fromProperty.id,
+            //         toProperty: toProperty.id,
+            //         nights: nights.toString(),
+            //         dateFrom: dateFrom,
+            //         dateTo: dateTo,
+            //         createdAt: new Date().toISOString(),
+            //         isCustomDate,
+            //     };
+
+            //     console.log("Creating swap request with data:", {
+            //         dateFrom: data.dateFrom,
+            //         dateTo: data.dateTo,
+            //         nights: data.nights,
+            //         isCustomDate: data.isCustomDate,
+            //         dateFromType: typeof data.dateFrom,
+            //         dateToType: typeof data.dateTo
+            //     });
+
+            //     const sr = await dal.create<SwapRequest>(`/items/swap_requests`, data);
+
+            //     console.log("Created swap request:", {
+            //         id: sr.id,
+            //         dateFrom: sr.dateFrom,
+            //         dateTo: sr.dateTo,
+            //         nights: sr.nights
+            //     });
+
+            //     // Process credits using the new credit management system
+            //     try {
+            //         await CreditManager.processSwapRequest(sr);
+            //     } catch (error) {
+            //         // If credit processing fails, delete the swap request and return error
+            //         await dal.delete(`/items/swap_requests/${sr.id}`).catch(() => {});
+            //         console.error("Credit processing error:", error);
+            //         return response.status(400).send({
+            //             error: error instanceof Error ? error.message : "Failed to process credits",
+            //             details: error instanceof Error ? error.stack : undefined
+            //         });
+            //     }
+
+            //     // Notify host
+            //     await notification(
+            //         {
+            //             from: u.id,
+            //             to: toProperty.owner,
+            //             type: "swaprequest_new",
+            //             title: "New Swap Request",
+            //         },
+            //         {
+            //             url: `${getAppUrl(request)}/chats/${sr.id}`,
+            //             user: fuser.firstName,
+            //             location: fromProperty.city || fromProperty.country,
+            //         }
+            //     );
+
+            //     response.status(200).send(sr);
+            // },
+
             post: async (request, response) => {
                 const u = request.user!;
                 const {
@@ -110,7 +336,15 @@ const route: BRoute = {
                 }
 
                 if (!fromProperty) return response.status(400).send({ error: "Invalid property (from)" });
-                if (fromProperty.owner !== u.id) return response.status(400).send({ error: "Invalid property" });
+                const ownerId =
+                    typeof fromProperty.owner === "object"
+                        ? (fromProperty.owner as any)?.id
+                        : fromProperty.owner;
+                if (String(ownerId) !== String(u.id)) {
+                    return response.status(400).send({ error: "Invalid property" });
+                }
+
+                // if (fromProperty.owner !== u.id) return response.status(400).send({ error: "Invalid property" });
                 if (!fromProperty.verified) return response.status(400).send({ error: "Cannot swap with unverified properties (from)" });
                 if (fromProperty.private) return response.status(400).send({ error: "Cannot swap with private properties" });
 
@@ -145,27 +379,8 @@ const route: BRoute = {
                 const availableCredits = (requester as any)?.credits ?? 0;
 
                 // Availability & Credit Logic
-
                 if (!isCustomDate) {
                     // Case 1: Guest picks one of host's slots
-                    // const availebleDates = toProperty.availebleDates || [];
-                    // console.log("toProperty.availebleDates", toProperty.availebleDates);
-                    // const requestedRange = { start: new Date(dateFrom), end: new Date(dateTo) };
-
-                    // const isValidSlot = availebleDates.some(slot => {
-                    //     if (!slot.value || slot.value.length < 2) return false;
-                    //     const slotStart = new Date(slot.value[0]);
-                    //     const slotEnd = new Date(slot.value[1]);
-                    //     return requestedRange.start >= slotStart && requestedRange.end <= slotEnd;
-                    // });
-                    // if (!isValidSlot) {
-                    //     return response.status(400).send({
-                    //         error: "Requested dates do not match any available slots",
-                    //         availebleSlots: availebleDates,
-                    //     });
-                    // }
-
-                    // Credits check
                     if (nights > availableCredits) {
                         return response.status(400).send({
                             error: `You have only ${availableCredits} credits, but the selected slot requires ${nights} credits`,
@@ -184,9 +399,7 @@ const route: BRoute = {
                     }
                 }
 
-                // -------------------------
                 // Prevent duplicate pending swap requests
-                // -------------------------
                 const qso = {
                     filter: JSON.stringify({
                         "_and": [
@@ -208,7 +421,7 @@ const route: BRoute = {
                     return response.status(400).send({ error: "Swap request already exists" });
                 }
 
-                // Create swap request
+                // Create swap request first (before credit processing)
                 const data = {
                     from: u.id,
                     to: toProperty.owner,
@@ -220,33 +433,60 @@ const route: BRoute = {
                     createdAt: new Date().toISOString(),
                     isCustomDate,
                 };
-                const sr = await dal.create<SwapRequest>(`/items/swap_requests`, data);
 
-                // Process credits using the new credit management system
+                let sr: SwapRequest;
                 try {
-                    await CreditManager.processSwapRequest(sr);
+                    sr = await dal.create<SwapRequest>(`/items/swap_requests`, data);
                 } catch (error) {
-                    // If credit processing fails, delete the swap request and return error
-                    await dal.delete(`/items/swap_requests/${sr.id}`).catch(() => {});
+                    console.error("Failed to create swap request:", error);
                     return response.status(400).send({
-                        error: error instanceof Error ? error.message : "Failed to process credits"
+                        error: "Failed to create swap request",
+                        details: error instanceof Error ? error.message : "Unknown error"
+                    });
+                }
+
+                // Process credits AFTER successful swap request creation
+                try {
+                    await CreditManager.processSwapRequest({
+                        ...sr,
+                        dateFrom: data.dateFrom,
+                        dateTo: data.dateTo,
+                        nights: data.nights,
+                    });
+                } catch (error) {
+                    // If credit processing fails, rollback the swap request
+                    try {
+                        await dal.delete(`/items/swap_requests/${sr.id}`);
+                    } catch (rollbackError) {
+                        console.error("Failed to rollback swap request:", rollbackError);
+                    }
+
+                    console.error("Credit processing error:", error);
+                    return response.status(400).send({
+                        error: error instanceof Error ? error.message : "Failed to process credits",
+                        details: error instanceof Error ? error.stack : undefined
                     });
                 }
 
                 // Notify host
-                await notification(
-                    {
-                        from: u.id,
-                        to: toProperty.owner,
-                        type: "swaprequest_new",
-                        title: "New Swap Request",
-                    },
-                    {
-                        url: `${getAppUrl(request)}/chats/${sr.id}`,
-                        user: fuser.firstName,
-                        location: fromProperty.city || fromProperty.country,
-                    }
-                );
+                try {
+                    await notification(
+                        {
+                            from: u.id,
+                            to: toProperty.owner,
+                            type: "swaprequest_new",
+                            title: "New Swap Request",
+                        },
+                        {
+                            url: `${getAppUrl(request)}/chats/${sr.id}`,
+                            user: fuser.firstName,
+                            location: fromProperty.city || fromProperty.country,
+                        }
+                    );
+                } catch (notificationError) {
+                    console.error("Failed to send notification:", notificationError);
+                    // Don't fail the request for notification errors
+                }
 
                 response.status(200).send(sr);
             },

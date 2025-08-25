@@ -56,7 +56,7 @@ const route: BRoute = {
         },
         "signup": {
             post: async (request, response) => {
-                const { email, password, firstName, lastName, phone, gender, onboarding } = request.body
+                const { email, password, firstName, lastName, phone, gender, onboarding, founder } = request.body
                 if (
                     !email ||
                     !password ||
@@ -115,7 +115,8 @@ const route: BRoute = {
                         return response.status(401).send({ error: "User already exists with verified phone number" })
                     }
                 }
-
+                
+           
                 const user = await dal.create<User>(`/items/users`, {
                     email,
                     password: hash(password),
@@ -125,11 +126,12 @@ const route: BRoute = {
                     gender,
                     onboarding,
                     createdAt: new Date().toISOString(),
-                    credits: 0,
+                    credits: founder ? 7 : 0,
+                    badgeName: founder ? "Founder" : null,
                     phoneVerified: false //default until they enter code
-
                 })
-
+                
+                
                 const host = getAppUrl(request)
                 const feAppEndpoint = getFEAppUrl()
                 Promise.all([

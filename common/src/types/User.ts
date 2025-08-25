@@ -37,7 +37,8 @@ export type User = PublicUser & {
     newMatches?: number
     payment: string | null
     registrationProvider?: string,
-    credits: number
+    credits: number,
+    badgeName?: string | null,
     
 }
 

@@ -20,6 +20,8 @@ jobs:
           username: ${{ secrets.PROD_USER }}
           key: ${{ secrets.PROD_KEY }}
           script: |
+            set -e
+            set -x
             cd /home/ubuntu/kaza-back-end
             git fetch origin
             git checkout staging-kaza-api-directus || git checkout -b staging-kaza-api-directus origin/staging-kaza-api-directus

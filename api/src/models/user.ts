@@ -62,6 +62,19 @@ export const email = {
         })
 
         return url
+    },
+
+    sendFounderRegistrationEmail: async (user: User) => {
+        const emailResponse : any = await sendEmail({
+            to: [{ email: user.email, name: user.firstName }],
+            template_id: "d-b7809587736a4899b7a53921357fb7f4",
+            dynamic_template_data: {
+            "first_name": user.firstName,
+            "full_name": `${user.firstName} ${user.lastName}`
+            },
+            subject: 'Welcome KazaSwap Founders'
+       })
+       return emailResponse
     }
 }
 

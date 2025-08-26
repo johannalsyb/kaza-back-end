@@ -29,10 +29,9 @@ jobs:
             docker-compose -f docker-compose.simple.yml down --remove-orphans
             docker system prune -f  #SAFE: no --volumes
             docker-compose -f docker-compose.simple.yml up -d --build --force-recreate
-            docker-compose -f docker-compose.simple.yml exec -T app sh -c 'until nc -z db 3306; do echo "Waiting for DB..."; sleep 3; done'
-            docker-compose -f docker-compose.simple.yml exec -T app npx directus database migrate:latest || (echo "Migration failed" && exit 1)
-            docker-compose -f docker-compose.simple.yml exec -T app npx directus database migrate:latest || (echo "Directus migration failed" && exit 1)
-            docker-compose -f docker-compose.simple.yml exec -T app npx knex migrate:latest --knexfile ./knexfile.js || (echo "Knex migration failed" && exit 1)
             
+            docker-compose -f docker-compose.simple.yml exec -T app sh -c 'until nc -z db 3306; do echo "Waiting for DB..."; sleep 3; done'
+            docker-compose -f docker-compose.simple.yml exec -T app npx directus database migrate:latest || (echo "Directus migration failed" && exit 1)
+            docker-compose -f docker-compose.simple.yml exec -T app sh -c "cd api && npx knex migrate:latest --knexfile ./knexfile.js" || (echo "Knex migration failed" && exit 1)
 
 

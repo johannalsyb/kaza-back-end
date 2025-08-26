@@ -130,7 +130,15 @@ const route: BRoute = {
                     badgeName: founder ? "Founder" : null,
                     phoneVerified: false //default until they enter code
                 })
-                
+                // --- send email to Founder ---
+                if (founder) {
+                    try {
+                    await Users.email.sendFounderRegistrationEmail(user)
+                    console.log('send email to founder successflly',user.email)
+                    } catch (err) {
+                    console.log("Error sending founder email:", err)
+                    }
+                }
                 
                 const host = getAppUrl(request)
                 const feAppEndpoint = getFEAppUrl()

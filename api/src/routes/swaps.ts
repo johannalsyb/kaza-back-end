@@ -16,6 +16,7 @@ import { randomUUID } from 'crypto'
 import Temp from '../../../common/src/types/Temp'
 import { WS_URL } from '../config'
 import redis from '../services/redis'
+import { createVeriffSession } from '../services/veriff'
 
 type WSToken = {
     id: string,
@@ -317,9 +318,13 @@ const route: BRoute = {
 
                 if (!toPropertyId) return response.status(400).send({ error: "Missing data" });
 
-                const fuser = await dal.get<Partial<User>>(`/items/users/${u.id}?fields=verified,firstName`);
+                const fuser = await dal.get<Partial<User>>(`/items/users/${u.id}?fields=verified,firstName,isVeriffPassed`);
                 if (!fuser || !fuser.verified) {
                     return response.status(400).send({ error: "User not verified" });
+                }
+
+                if (!fuser.isVeriffPassed) {
+                    return response.status(400).send({ error: "You are not verified with Veriff. Please complete identity verification before swapping." });
                 }
 
                 // Validate fromProperty
@@ -869,6 +874,49 @@ const route: BRoute = {
                             }
                         },
                     }
+                }
+            }
+        },
+        "veriff/start": {
+            post: async (request, response) => {
+                const u = request.user!;
+                const user = await dal.get<User>(`/items/users/${u.id}?fields=firstName,lastName,email,isVeriffPassed`);
+
+                if (user.isVeriffPassed) {
+                    return response.status(200).send({ message: "Already verified" });
+                }
+
+                try {
+                    const session = await createVeriffSession(u.id, user.firstName, user.lastName || "", user.email || "");
+                    response.status(200).send(session.verification); // { id, url }
+                } catch (err) {
+                    console.error("Veriff start error:", err);
+                    response.status(500).send({ error: "Failed to start Veriff session" });
+                }
+            }
+        },
+        "veriff/webhook": {
+            post: async (request, response) => {
+                try {
+                    const event = request.body; // Veriff webhook payload
+                    console.log("Veriff webhook:", event);
+
+                    if (event.action === "verification.finished") {
+                        const { status } = event.verification;
+                        const userId = event.verification.vendorData; // we stored userId as vendorData
+
+                        if (status === "approved") {
+                            await dal.update(`/items/users/${userId}`, { isVeriffPassed: true });
+                            console.log(` User ${userId} verification passed`);
+                        } else {
+                            console.log(` User ${userId} verification failed with status: ${status}`);
+                        }
+                    }
+
+                    response.status(200).send({ ok: true });
+                } catch (err) {
+                    console.error("Webhook error:", err);
+                    response.status(500).send({ error: "Webhook processing failed" });
                 }
             }
         },

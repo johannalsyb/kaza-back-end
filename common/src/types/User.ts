@@ -39,6 +39,7 @@ export type User = PublicUser & {
     registrationProvider?: string,
     credits: number,
     badgeName?: string | null,
+    isVeriffPassed: boolean,
     
 }
 

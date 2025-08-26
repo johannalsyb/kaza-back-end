@@ -128,7 +128,8 @@ const route: BRoute = {
                     createdAt: new Date().toISOString(),
                     credits: founder ? 7 : 0,
                     badgeName: founder ? "Founder" : null,
-                    phoneVerified: false //default until they enter code
+                    phoneVerified: false, //default until they enter code
+                    isVeriffPassed: false, // default until they pass veriff
                 })
                 
                 

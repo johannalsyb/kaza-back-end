@@ -52,53 +52,53 @@ const validateAvailableSlots = (availebleDates: any): { isValid: boolean; error?
     if (!availebleDates) {
         return { isValid: true }; // If not provided, it's valid (empty array will be set)
     }
-    
+
     if (!Array.isArray(availebleDates)) {
-        return { 
-            isValid: false, 
-            error: "Available dates must be an array" 
+        return {
+            isValid: false,
+            error: "Available dates must be an array"
         };
     }
-    
+
     if (availebleDates.length > MAX_AVAILABLE_SLOTS) {
-        return { 
-            isValid: false, 
-            error: `Maximum ${MAX_AVAILABLE_SLOTS} available slots allowed per property` 
+        return {
+            isValid: false,
+            error: `Maximum ${MAX_AVAILABLE_SLOTS} available slots allowed per property`
         };
     }
-    
+
     // Validate each slot structure
     for (const slot of availebleDates) {
         if (!slot || typeof slot !== 'object') {
-            return { 
-                isValid: false, 
-                error: "Each slot must be an object" 
+            return {
+                isValid: false,
+                error: "Each slot must be an object"
             };
         }
-        
+
         if (!slot.id || typeof slot.id !== 'string') {
-            return { 
-                isValid: false, 
-                error: "Each available slot must have a valid 'id' string" 
+            return {
+                isValid: false,
+                error: "Each available slot must have a valid 'id' string"
             };
         }
-        
+
         if (!Array.isArray(slot.value)) {
-            return { 
-                isValid: false, 
-                error: "Each available slot must have a 'value' array" 
+            return {
+                isValid: false,
+                error: "Each available slot must have a 'value' array"
             };
         }
-        
+
         // Validate that all values in the array are strings
         if (!slot.value.every((val: any) => typeof val === 'string')) {
-            return { 
-                isValid: false, 
-                error: "All values in slot 'value' array must be strings" 
+            return {
+                isValid: false,
+                error: "All values in slot 'value' array must be strings"
             };
         }
     }
-    
+
     return { isValid: true };
 }
 
@@ -183,15 +183,15 @@ const route: BRoute = {
     },
     post: [async (request, response) => {
         const { address, availebleDates } = request.body
-        
+
         if (!address || !address.length) return response.status(400).send({ error: "No address" })
-        
+
         // Validate available slots
         const slotsValidation = validateAvailableSlots(availebleDates);
         if (!slotsValidation.isValid) {
             return response.status(400).send({ error: slotsValidation.error });
         }
-        
+
         const fullAddress = await addressLookup(address)
         if (!fullAddress) return response.status(406).send({ error: "Invalid address" })
         const approx = await gmaps.approximateCoordinates(fullAddress.lat, fullAddress.lon)
@@ -239,7 +239,7 @@ const route: BRoute = {
                 const property = await findProperty(propertyId, request.user)
                 if (!property) return response.status(404).send({ error: "Not found" })
                 const { body } = request as { body: Partial<Property> }
-                
+
                 // Validate available slots if being updated
                 if (body.availebleDates) {
                     const slotsValidation = validateAvailableSlots(body.availebleDates);
@@ -247,7 +247,7 @@ const route: BRoute = {
                         return response.status(400).send({ error: slotsValidation.error });
                     }
                 }
-                
+
                 console.log('body', body)
                 const forbiddenKeys: (keyof Property)[] = [
                     "id", "owner", "verified", "lat", "lon", "approxLat", "approxLon", "createdAt", "updatedAt",
@@ -303,8 +303,16 @@ const route: BRoute = {
                         if (!property) return response.status(404).send({ error: "Not found" })
                         if (!request.body.files || !request.body.files.length) return response.status(400).send({ error: "No files" })
                         const files = request.body.files as string[]
-                        const images = await uploadPictures(property, files)
-                        response.status(200).send({ images })
+                        // const images = await uploadPictures(property, files)
+                        // response.status(200).send({ images })
+                        try {
+                            const files = request.body.files as string[]
+                            const images = await uploadPictures(property, files)
+                            response.status(200).send({ images })
+                        } catch (err) {
+                            console.error("Upload failed:", err)
+                            response.status(400).send({ error: "Invalid image upload" })
+                        }
                     },
                     routes: {
                         ":imageId": {
@@ -343,13 +351,13 @@ const route: BRoute = {
                         const property = await dal.get<Property>(`/items/properties/${propertyId}?fields[]=availebleDates`)
                             .catch(err => null)
                         if (!property) return response.status(404).send({ error: "Not found" })
-                        
+
                         // Check if user has permission to view this property's slots
                         // if (property.private && (!request.user || (property.owner !== request.user.id && !request.user.role.includes("admin")))) {
                         //     return response.status(403).send({ error: "Forbidden" })
                         // }
-                        
-                        response.status(200).send({ 
+
+                        response.status(200).send({
                             availableSlots: property.availebleDates || [],
                             maxSlots: MAX_AVAILABLE_SLOTS,
                             remainingSlots: MAX_AVAILABLE_SLOTS - (property.availebleDates?.length || 0)
@@ -359,36 +367,36 @@ const route: BRoute = {
                         const { propertyId } = request.params
                         const property = await findProperty(propertyId, request.user)
                         if (!property) return response.status(404).send({ error: "Not found" })
-                        
+
                         const currentSlots = property.availebleDates || []
                         const newSlot = request.body as AvailebleDates
-                        
+
                         // Validate new slot structure
                         const singleSlotValidation = validateAvailableSlots([newSlot]);
                         if (!singleSlotValidation.isValid) {
                             return response.status(400).send({ error: singleSlotValidation.error });
                         }
-                        
+
                         // Check if we're at the limit
                         if (currentSlots.length >= MAX_AVAILABLE_SLOTS) {
-                            return response.status(400).send({ 
-                                error: `Maximum ${MAX_AVAILABLE_SLOTS} available slots allowed per property` 
+                            return response.status(400).send({
+                                error: `Maximum ${MAX_AVAILABLE_SLOTS} available slots allowed per property`
                             })
                         }
-                        
+
                         // Check for duplicate slot IDs
                         if (currentSlots.some(slot => slot.id === newSlot.id)) {
-                            return response.status(400).send({ 
-                                error: "Slot with this ID already exists" 
+                            return response.status(400).send({
+                                error: "Slot with this ID already exists"
                             })
                         }
-                        
+
                         const updatedSlots: AvailebleDates[] = [...currentSlots, newSlot]
                         const updated = await dal.update<Property>(`/items/properties/${propertyId}`, {
                             availebleDates: updatedSlots
                         })
-                        
-                        response.status(200).send({ 
+
+                        response.status(200).send({
                             availableSlots: updatedSlots,
                             maxSlots: MAX_AVAILABLE_SLOTS,
                             remainingSlots: MAX_AVAILABLE_SLOTS - updatedSlots.length
@@ -400,33 +408,33 @@ const route: BRoute = {
                                 const { propertyId, slotId } = request.params
                                 const property = await findProperty(propertyId, request.user)
                                 if (!property) return response.status(404).send({ error: "Not found" })
-                                
+
                                 const currentSlots = property.availebleDates || []
                                 const slotIndex = currentSlots.findIndex(slot => slot.id === slotId)
-                                
+
                                 if (slotIndex === -1) {
                                     return response.status(404).send({ error: "Slot not found" })
                                 }
-                                
-                                const updatedSlot: AvailebleDates = { 
-                                    ...currentSlots[slotIndex], 
-                                    ...request.body 
+
+                                const updatedSlot: AvailebleDates = {
+                                    ...currentSlots[slotIndex],
+                                    ...request.body
                                 }
-                                
+
                                 // Validate the updated slot
                                 const singleSlotValidation = validateAvailableSlots([updatedSlot]);
                                 if (!singleSlotValidation.isValid) {
                                     return response.status(400).send({ error: singleSlotValidation.error });
                                 }
-                                
+
                                 const updatedSlots: AvailebleDates[] = [...currentSlots]
                                 updatedSlots[slotIndex] = updatedSlot
-                                
+
                                 const updated = await dal.update<Property>(`/items/properties/${propertyId}`, {
                                     availebleDates: updatedSlots
                                 })
-                                
-                                response.status(200).send({ 
+
+                                response.status(200).send({
                                     slot: updatedSlot,
                                     availableSlots: updatedSlots
                                 })
@@ -435,19 +443,19 @@ const route: BRoute = {
                                 const { propertyId, slotId } = request.params
                                 const property = await findProperty(propertyId, request.user)
                                 if (!property) return response.status(404).send({ error: "Not found" })
-                                
+
                                 const currentSlots = property.availebleDates || []
                                 const updatedSlots: AvailebleDates[] = currentSlots.filter(slot => slot.id !== slotId)
-                                
+
                                 if (updatedSlots.length === currentSlots.length) {
                                     return response.status(404).send({ error: "Slot not found" })
                                 }
-                                
+
                                 const updated = await dal.update<Property>(`/items/properties/${propertyId}`, {
                                     availebleDates: updatedSlots
                                 })
-                                
-                                response.status(200).send({ 
+
+                                response.status(200).send({
                                     availableSlots: updatedSlots,
                                     maxSlots: MAX_AVAILABLE_SLOTS,
                                     remainingSlots: MAX_AVAILABLE_SLOTS - updatedSlots.length

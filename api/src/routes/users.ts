@@ -7,6 +7,7 @@ import { Api } from '../../../common/src/types/api'
 import { getAppUrl } from '../utils'
 import Property from '../../../common/src/types/Property'
 import redis from '../services/redis'
+import { findPropertyByOwner } from './properties'
 
 export const findUser = async (id: string, user?: User) => {
     if (!user) return null
@@ -97,10 +98,14 @@ const route: BRoute = {
                 const isMe = (userId === "me") || (request.user && foundUser.id === request.user.id)
 
                 if (isMe) {
+                    const property = await findPropertyByOwner(foundUser.id)
+                    const address = property?.address ?? null
+
                     const meResponse = {
                         ...foundUser,
                         password: undefined,
                         credits: (foundUser as any).credits ?? 0,
+                        address,
                     }
                     return response.status(200).send<Api.Users.Me>(meResponse as unknown as Api.Users.Me)
                 }

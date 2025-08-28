@@ -47,6 +47,13 @@ type AvailebleDates = {
     value: string[]
 }
 
+export const findPropertyByOwner = async (ownerId: string): Promise<Property | null> => {
+    const filter = [{ owner: { "_eq": ownerId } }]
+    const props = await getProperties(filter, true) as Property[]
+    return props.length ? props[0] : null
+}
+
+
 // Validation function for available dates/slots
 const validateAvailableSlots = (availebleDates: any): { isValid: boolean; error?: string } => {
     if (!availebleDates) {

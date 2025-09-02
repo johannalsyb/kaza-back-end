@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "cd api && nodemon --inspect --watch src --exec ts-node src/server.ts",
+    "start": "cd api && nodemon --inspect --watch src --exec ts-history src/server.ts",
     "watch": "cd api && nodemon --watch src --exec ts-node src/server.ts & cd web && npm run start",
     "migrate": "npm run migrate:up",
     "migrate:up": "docker-compose exec directus npx directus database migrate:up",
@@ -17,5 +17,8 @@
   "license": "ISC",
   "dependencies": {
     "node-cron": "^4.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }

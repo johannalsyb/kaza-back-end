@@ -115,8 +115,8 @@ const route: BRoute = {
                         return response.status(401).send({ error: "User already exists with verified phone number" })
                     }
                 }
-                
-           
+
+
                 const user = await dal.create<User>(`/items/users`, {
                     email,
                     password: hash(password),
@@ -133,13 +133,13 @@ const route: BRoute = {
                 // --- send email to Founder ---
                 if (founder) {
                     try {
-                    await Users.email.sendFounderRegistrationEmail(user)
-                    console.log('send email to founder successflly',user.email)
+                        await Users.email.sendFounderRegistrationEmail(user)
+                        console.log('send email to founder successflly', user.email)
                     } catch (err) {
-                    console.log("Error sending founder email:", err)
+                        console.log("Error sending founder email:", err)
                     }
                 }
-                
+
                 const host = getAppUrl(request)
                 const feAppEndpoint = getFEAppUrl()
                 Promise.all([
@@ -241,26 +241,119 @@ const route: BRoute = {
                 }
                 return response.status(400).send({ error: "Invalid request" })
             },
+            // post: async (request, response) => {
+            //     const { token, password } = request.body
+
+            //     const temp = await dal.get<Temp>(`/items/temp/${token}`)
+            //     if (!temp)
+            //         return response.status(404).send({ error: "Invalid token" })
+            //     if (temp.type !== "resetpassword")
+            //         return response.status(404).send({ error: "Invalid token" })
+            //     if (temp.expiry < Date.now())
+            //         return response.status(404).send({ error: "Invalid token" })
+
+            //     const user = await dal.get<User>(`/items/users/${temp.data}`)
+            //     if (!user)
+            //         return response.status(404).send({ error: "Invalid token" })
+
+            //     await dal.delete(`/items/temp/${token}`)
+            //     await dal.update<User>(`/items/users/${user.id}`, { password: hash(password) })
+
+            //     response.status(200).send<Api.Auth.ResetPassword>({ message: "Success" })
+            // },
             post: async (request, response) => {
-                const { token, password } = request.body
+                const { token, password } = request.body;
+                console.log(`Request body:`, request.body);
 
-                const temp = await dal.get<Temp>(`/items/temp/${token}`)
-                if (!temp)
-                    return response.status(404).send({ error: "Invalid token" })
-                if (temp.type !== "resetpassword")
-                    return response.status(404).send({ error: "Invalid token" })
-                if (temp.expiry < Date.now())
-                    return response.status(404).send({ error: "Invalid token" })
+                if (!token || !password) {
+                    return response.status(400).send({ error: "No token or password found" });
+                }
 
-                const user = await dal.get<User>(`/items/users/${temp.data}`)
-                if (!user)
-                    return response.status(404).send({ error: "Invalid token" })
+                try {
+                    const encodedToken = encodeURIComponent(token);
+                    console.log(`Attempting to reset password with encoded token: ${encodedToken}`);
 
-                await dal.delete(`/items/temp/${token}`)
-                await dal.update<User>(`/items/users/${user.id}`, { password: hash(password) })
+                    const temp = await dal.get<Temp>(`/items/temp/${encodedToken}`);
+                    if (!temp) {
+                        return response.status(404).send({ error: "Invalid token" });
+                    }
 
-                response.status(200).send<Api.Auth.ResetPassword>({ message: "Success" })
+                    console.log(`Found temp record:`, temp);
+
+                    const user = await dal.get<User>(`/items/users/${temp.data}`);
+                    if (!user) {
+                        return response.status(404).send({ error: "User not found" });
+                    }
+
+                    console.log(`Found user:`, user);
+
+                    await dal.update<User>(`/items/users/${user.id}`, {
+                        password: hash(password)
+                    });
+
+                    console.log(`Password updated for user ${user.id}`);
+
+                    await dal.delete(`/items/temp/${encodedToken}`);
+
+                    console.log(`Temp token ${token} deleted`);
+
+                    return response.status(200).send({ message: "Password updated successfully" });
+                } catch (err) {
+                    console.error(err);
+                    return response.status(500).send({ error: "Internal server error" });
+                }
+            }
+        },
+        "change-password": {
+            post: async (request, response) => {
+                const { currentPassword, newPassword } = request.body;
+                
+                // Validate required fields
+                if (!currentPassword || !newPassword ) {
+                    return response.status(400).send({ error: "Missing required fields" });
+                }
+                
+                // Validate password confirmation
+                // if (newPassword !== confirmPassword) {
+                //     return response.status(400).send({ error: "New password and confirm password do not match" });
+                // }
+                
+                // Validate new password length (optional - add your own validation rules)
+                // if (newPassword.length < 6) {
+                //     return response.status(400).send({ error: "New password must be at least 6 characters long" });
+                // }
+                
+                try {
+                    // Get current user from token
+                    const user = await dal.get<User>(`/items/users/${request.user?.id}`);
+                    if (!user) {
+                        return response.status(404).send({ error: "User not found" });
+                    }
+                    
+                    // Check if user has a password (for Google OAuth users)
+                    if (!user.password) {
+                        return response.status(400).send({ error: "Cannot change password for Google OAuth account" });
+                    }
+                    
+                    // Verify current password
+                    if (user.password !== hash(currentPassword)) {
+                        return response.status(401).send({ error: "Current password is incorrect" });
+                    }
+                    
+                    // Update to new password
+                    await dal.update<User>(`/items/users/${user.id}`, {
+                        password: hash(newPassword)
+                    });
+                    
+                    console.log(`Password changed successfully for user ${user.id}`);
+                    
+                    return response.status(200).send({ message: "Password changed successfully" });
+                } catch (err) {
+                    console.error('Error changing password:', err);
+                    return response.status(500).send({ error: "Internal server error" });
+                }
             },
+            middlewares: [auth]
         },
         "checkout": {
             post: async (request, response) => {

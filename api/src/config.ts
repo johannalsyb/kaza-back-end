@@ -24,7 +24,7 @@ export const BASE_URL = process.env.BASE_URL
 
 export const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:7379/0"
 
-export const DIRECTUS_URL = process.env.DIRECTUS_URL || "http://localhost:8065"
+export const DIRECTUS_URL = process.env.DIRECTUS_URL || "http://localhost:8055"
 export const DIRECTUS_AUTH_BEARER = process.env.DIRECTUS_AUTH_BEARER
 export const DIRECTUS_QUERY_LIMIT = parseInt(process.env.DIRECTUS_QUERY_LIMIT || "50") || 50
 

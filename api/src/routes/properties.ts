@@ -6,13 +6,50 @@ import User from '../../../common/src/types/User'
 import s3 from '../services/s3'
 import { DIRECTUS_QUERY_LIMIT, IMAGE_SERVER, S3_IMAGES_BUCKET, S3_IMAGES_PREFIX } from '../config'
 import gmaps, { Gmaps } from '../services/gmaps'
-import { PublicProperty } from '../../../common/src/types/Property'
+import { AvailableSlot, PublicProperty } from '../../../common/src/types/Property'
 import { rotatePicture, uploadPictures } from '../models/property'
 import { addressLookup, autocomplete, zoneLookup } from '../utils/location'
 import { PrivateProperty } from '../../../common/src/types/api/properties'
 import redis, { find } from '../services/redis'
+import { v4 as uuidv4 } from "uuid";
 
 const MAX_AVAILABLE_SLOTS = 3;
+
+
+function validateAvailableSlotRanges(slots: any[]): { isValid: boolean; error?: string; data?: AvailableSlot[] } {
+    if (!Array.isArray(slots)) {
+        return { isValid: false, error: "availableSlots must be an array" };
+    }
+
+    const parsedSlots: AvailableSlot[] = [];
+
+    for (let i = 0; i < slots.length; i++) {
+        const slot = slots[i];
+        if (!slot.dateFrom || !slot.dateTo) {
+            return { isValid: false, error: `Slot ${i + 1} must have both dateFrom and dateTo` };
+        }
+
+        const from = new Date(slot.dateFrom);
+        const to = new Date(slot.dateTo);
+
+        if (isNaN(from.getTime()) || isNaN(to.getTime())) {
+            return { isValid: false, error: `Slot ${i + 1} has invalid date format` };
+        }
+
+        if (from >= to) {
+            return { isValid: false, error: `Slot ${i + 1} dateFrom must be before dateTo` };
+        }
+
+        parsedSlots.push({
+            id: uuidv4(),  // generate ID automatically
+            dateFrom: from.toISOString(),
+            dateTo: to.toISOString()
+        });
+    }
+
+    return { isValid: true, data: parsedSlots };
+}
+
 
 const findProperty = async (id: string, user?: User) => {
     if (!user) return null
@@ -189,7 +226,7 @@ const route: BRoute = {
         response.status(200).send(properties)
     },
     post: [async (request, response) => {
-        const { address, availebleDates } = request.body
+        const { address, availebleDates, availableSlots } = request.body
 
         if (!address || !address.length) return response.status(400).send({ error: "No address" })
 
@@ -197,6 +234,17 @@ const route: BRoute = {
         const slotsValidation = validateAvailableSlots(availebleDates);
         if (!slotsValidation.isValid) {
             return response.status(400).send({ error: slotsValidation.error });
+        }
+
+        // Validate available slots (dateFrom/dateTo)
+        // Validate and auto-generate IDs for availableSlots
+        let validatedSlots: AvailableSlot[] = [];
+        if (availableSlots && Array.isArray(availableSlots)) {
+            const slotValidation = validateAvailableSlotRanges(availableSlots);
+            if (!slotValidation.isValid) {
+                return response.status(400).send({ error: slotValidation.error });
+            }
+            validatedSlots = slotValidation.data!;
         }
 
         const fullAddress = await addressLookup(address)
@@ -219,6 +267,7 @@ const route: BRoute = {
             verified: false,
             private: !verified,
             availebleDates: availebleDates || [],
+            availableSlots: validatedSlots
         }
         property.images = ""
 

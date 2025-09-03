@@ -38,6 +38,7 @@ export type Property = PublicProperty & {
     updatedAt: string,
     createdDate: string,
     availebleDates: AvailebleDates[],
+    availableSlots: AvailableSlot[],
 }
 
 export default Property
@@ -45,4 +46,10 @@ export default Property
 type AvailebleDates = {
     id: string,
     value: string[]
+}
+
+export type AvailableSlot = {
+    id: string,
+    dateFrom: string,
+    dateTo: string
 }

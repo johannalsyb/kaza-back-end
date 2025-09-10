@@ -15,8 +15,11 @@ import { v4 as uuidv4 } from "uuid";
 
 const MAX_AVAILABLE_SLOTS = 3;
 
-
-function validateAvailableSlotRanges(slots: any[]): { isValid: boolean; error?: string; data?: AvailableSlot[] } {
+function validateAvailableSlotRanges(slots: any[]): {
+    isValid: boolean;
+    error?: string;
+    data?: AvailableSlot[]
+} {
     if (!Array.isArray(slots)) {
         return { isValid: false, error: "availableSlots must be an array" };
     }
@@ -41,7 +44,7 @@ function validateAvailableSlotRanges(slots: any[]): { isValid: boolean; error?: 
         }
 
         parsedSlots.push({
-            id: uuidv4(),  // generate ID automatically
+            id: slot.id || uuidv4(),
             dateFrom: from.toISOString(),
             dateTo: to.toISOString()
         });
@@ -170,6 +173,7 @@ export const publicPropertyFields = [
     "childrenAllowed",
     "bedArrangements",
     "availebleDates",
+    "availableSlots"
 ]
 
 export const privatePropertyFields = [
@@ -285,9 +289,11 @@ const route: BRoute = {
         ":propertyId": {
             get: async (request, response) => {
                 const { propertyId } = request.params
-                const property = await dal.get<PublicProperty>(`/items/properties/${propertyId}?fields[]=${publicPropertyWithOwnerFields.join(",")}`)
-                    .catch(err => null)
+                console.log("---------------------------------------->", propertyId)
+                const property = await dal.get<PublicProperty>(`/items/properties/${propertyId}?fields[]=${publicPropertyWithOwnerFields.join(",")}`)    
+                .catch(err => null)
                 if (!property) return response.status(404).send({ error: "Not found" })
+                console.log("------------------------------------------------------------------------>>",JSON.stringify(property))
                 response.status(200).send(property)
             },
             patch: [async (request, response) => {
@@ -344,6 +350,14 @@ const route: BRoute = {
                     const nn = (nproperty.images || property.images).split(",").filter(i => i !== body.primaryImage)
                     nn.unshift(body.primaryImage)
                     nproperty.images = nn.join(",")
+                }
+
+                if (body.availableSlots) {
+                    const slotsValidation = validateAvailableSlotRanges(body.availableSlots);
+                    if (!slotsValidation.isValid) {
+                        return response.status(400).send({ error: slotsValidation.error });
+                    }
+                    nproperty.availableSlots = slotsValidation.data!;
                 }
 
                 await redis.remove(`marker:${propertyId}`)

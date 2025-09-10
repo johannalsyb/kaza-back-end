@@ -26,7 +26,7 @@ setup-backup.sh
 test-local.sh
 test.txt
 redis-data
-script/start_services.sh
+.script
 start.sh
 run-backup.sh
 

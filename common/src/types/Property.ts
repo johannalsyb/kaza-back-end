@@ -21,6 +21,7 @@ export type PublicProperty = {
     smokingAllowed: boolean,
     childrenAllowed: boolean,
     bedArrangements: string,
+    availableSlots: AvailableSlot[],
 }
 
 export type Property = PublicProperty & {

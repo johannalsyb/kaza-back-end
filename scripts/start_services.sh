@@ -20,8 +20,8 @@ echo "Setting up AWS credentials..."
 docker exec $(docker compose -f docker-compose.simple.yml ps -q db) mkdir -p /root/.aws
 docker exec $(docker compose -f docker-compose.simple.yml ps -q db) sh -c "cat > /root/.aws/credentials << EOF
 [default]
-aws_access_key_id = REMOVED_AWS_KEY
-aws_secret_access_key = REMOVED_AWS_SECRET
+aws_access_key_id = 
+aws_secret_access_key = 
 EOF"
 docker exec $(docker compose -f docker-compose.simple.yml ps -q db) sh -c "cat > /root/.aws/config << EOF
 [default]
